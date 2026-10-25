@@ -1,7 +1,567 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8"<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>SolarSale Pro Miền Nam — Cẩm Nang & Công Cụ Telesale Điện Mặt Trời</title>
+  <style>
+    :root {
+      --bg: #0f172a; --card: #1e293b; --card2: #0b1120; --text: #f8fafc; --muted: #94a3b8;
+      --border: #334155; --amber: #f59e0b; --amber-bg: rgba(245,158,11,0.12);
+      --emerald: #10b981; --emerald-bg: rgba(16,185,129,0.12);
+      --rose: #f43f5e; --rose-bg: rgba(244,63,94,0.12);
+      --sky: #38bdf8; --sky-bg: rgba(56,189,248,0.12);
+    }
+    body.light {
+      --bg: #f8fafc; --card: #ffffff; --card2: #f1f5f9; --text: #0f172a; --muted: #64748b;
+      --border: #e2e8f0; --amber: #d97706; --amber-bg: #fffbeb;
+      --emerald: #059669; --emerald-bg: #ecfdf5;
+      --rose: #e11d48; --rose-bg: #fff1f2;
+      --sky: #0284c7; --sky-bg: #f0f9ff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; padding-bottom: 84px; overflow-x: hidden; }
+    .container { max-width: 1240px; margin: 0 auto; padding: 0 14px; }
+    header { position: sticky; top: 0; z-index: 40; background: var(--card); border-bottom: 1px solid var(--border); padding: 10px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .hdr-inner { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .logo { width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, #f59e0b, #ea580c); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .brand h1 { font-size: 16px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .brand p { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .desktop-nav { display: none; gap: 6px; background: var(--card2); padding: 4px; border-radius: 12px; border: 1px solid var(--border); }
+    .nav-btn { border: none; background: transparent; color: var(--muted); font-weight: 700; font-size: 12px; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: 0.15s; }
+    .nav-btn.active { background: var(--amber); color: #fff; }
+    .theme-btn { border: 1px solid var(--border); background: var(--card2); color: var(--text); padding: 7px 11px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 12px; flex-shrink: 0; }
+    main { padding-top: 16px; }
+    .panel { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 16px; }
+    .badge { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 800; background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber); margin-bottom: 6px; }
+    h2 { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
+    .search-wrap { position: relative; margin-top: 10px; }
+    .input, select { width: 100%; padding: 12px 14px; border-radius: 12px; border: 2px solid var(--border); background: var(--card2); color: var(--text); font-size: 16px; font-weight: 600; outline: none; }
+    .input:focus, select:focus { border-color: var(--amber); }
+    .chips { display: flex; gap: 6px; overflow-x: auto; padding: 10px 0 4px; scrollbar-width: none; }
+    .chips::-webkit-scrollbar { display: none; }
+    .chip { border: 1px solid var(--border); background: var(--card2); color: var(--text); padding: 6px 11px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; cursor: pointer; }
+    .chip:hover, .chip.active { background: var(--amber); color: #fff; border-color: var(--amber); }
+    .grid-2 { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    .grid-12 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+    .kpi { background: var(--card2); border: 1px solid var(--border); border-radius: 12px; padding: 11px; }
+    .kpi .lbl { font-size: 11px; color: var(--muted); font-weight: 600; }
+    .kpi .val { font-size: 18px; font-weight: 800; margin-top: 2px; }
+    .kpi .sub { font-size: 11px; font-weight: 700; margin-top: 2px; }
+    .obj-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 15px; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; }
+    .obj-q { font-size: 15px; font-weight: 800; line-height: 1.4; color: var(--amber); }
+    .psy-box { background: var(--sky-bg); border: 1px solid var(--sky); color: var(--text); padding: 8px 10px; border-radius: 10px; font-size: 12px; }
+    .script-box { background: var(--card2); border: 1px solid var(--border); border-radius: 12px; padding: 11px; margin-top: 8px; }
+    .script-hdr { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 12px; font-weight: 800; }
+    .copy-btn { border: none; background: var(--amber); color: #fff; padding: 4px 10px; border-radius: 7px; font-size: 11px; font-weight: 800; cursor: pointer; flex-shrink: 0; }
+    .hook-box { background: var(--emerald-bg); border: 1px solid var(--emerald); padding: 10px; border-radius: 11px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { padding: 9px 8px; border-bottom: 1px solid var(--border); text-align: left; }
+    th { background: var(--card2); color: var(--muted); font-weight: 800; }
+    .text-right { text-align: right; }
+    .app-row { background: var(--card2); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+    .app-row.active { border-color: var(--amber); background: var(--amber-bg); }
+    .stepper { display: inline-flex; align-items: center; border: 1px solid var(--border); border-radius: 8px; background: var(--card); overflow: hidden; }
+    .stepper button { border: none; background: transparent; color: var(--text); width: 32px; height: 32px; font-size: 16px; font-weight: 800; cursor: pointer; }
+    .stepper span { width: 30px; text-align: center; font-weight: 800; font-size: 13px; }
+    .progress-wrap { width: 100%; height: 12px; background: var(--card2); border-radius: 999px; overflow: hidden; border: 1px solid var(--border); margin: 8px 0; }
+    .progress-bar { height: 100%; background: linear-gradient(90deg, #10b981, #f59e0b); transition: width 0.25s; }
+    .mobile-nav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; background: var(--card); border-top: 1px solid var(--border); display: grid; grid-template-columns: repeat(4, 1fr); height: 62px; }
+    .m-btn { border: none; background: transparent; color: var(--muted); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; gap: 2px; cursor: pointer; }
+    .m-btn.active { color: var(--amber); font-weight: 800; }
+    .hidden { display: none !important; }
+    #toast { position: fixed; bottom: 74px; right: 16px; z-index: 60; background: #10b981; color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 12px; font-weight: 800; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+    @media (min-width: 900px) {
+      body { padding-bottom: 30px; }
+      .desktop-nav { display: flex; }
+      .mobile-nav { display: none; }
+      .grid-2 { grid-template-columns: repeat(2, 1fr); }
+      .grid-12 { grid-template-columns: 5fr 7fr; }
+      .kpi-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container hdr-inner">
+      <div class="brand">
+        <div class="logo">☀️</div>
+        <div>
+          <h1>SolarSale Pro <span style="color:var(--amber)">Miền Nam</span></h1>
+          <p>Trợ lý thực chiến Telesale Điện Mặt Trời TP.HCM • Đông Nam Bộ • Miền Tây</p>
+        </div>
+      </div>
+      <nav class="desktop-nav">
+        <button type="button" id="nd-objections" class="nav-btn active" onclick="goTab('objections')">🛡️ Xử Lý Từ Chối (EQ Cao)</button>
+        <button type="button" id="nd-bill" class="nav-btn" onclick="goTab('bill')">⚡ Tính Tiền Điện EVN</button>
+        <button type="button" id="nd-battery" class="nav-btn" onclick="goTab('battery')">🔋 Tải Thiết Bị &amp; Pin 16kWh</button>
+        <button type="button" id="nd-glossary" class="nav-btn" onclick="goTab('glossary')">📘 Cẩm Nang Solar</button>
+      </nav>
+      <button type="button" class="theme-btn" onclick="document.body.classList.toggle('light')">🌓 Sáng/Tối</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- TAB 1: OBJECTIONS -->
+    <section id="tab-objections">
+      <div class="panel">
+        <span class="badge">🔥 SIÊU CẨM NANG XỬ LÝ TỪ CHỐI EQ CAO — KHÁCH MIỀN NAM</span>
+        <h2>Tra Nhanh Kịch Bản Giải Đáp &amp; Chốt Sale Thực Chiến (<span id="obj-cnt">0</span> tình huống)</h2>
+        <div class="search-wrap">
+          <input type="text" id="obj-q" class="input" oninput="renderObjs()" placeholder="Gõ nhanh không dấu / viết tắt: vd 'mac qua', 'hoi vo', 'ban dem', 'evn', 'mua bao', 'dot mai', 'chay no', 're hon', 'zalo', '16kwh'..." />
+        </div>
+        <div class="chips">
+          <button type="button" class="chip active" onclick="setKw('')">Tất cả</button>
+          <button type="button" class="chip" onclick="setKw('mac qua')">💰 Giá cao / Mắc quá</button>
+          <button type="button" class="chip" onclick="setKw('hoi vo')">👨‍👩‍👧 Hỏi vợ / chồng</button>
+          <button type="button" class="chip" onclick="setKw('ban dem')">🌙 Đi làm ngày / Xài đêm</button>
+          <button type="button" class="chip" onclick="setKw('evn')">⚡ EVN không mua điện</button>
+          <button type="button" class="chip" onclick="setKw('mua bao')">🌧️ Mùa mưa miền Nam</button>
+          <button type="button" class="chip" onclick="setKw('dot mai')">🏠 Sợ dột mái tôn</button>
+          <button type="button" class="chip" onclick="setKw('chay no')">🔥 Sợ cháy nổ Pin</button>
+          <button type="button" class="chip" onclick="setKw('bao hanh')">🛡️ Sợ công ty nghỉ</button>
+          <button type="button" class="chip" onclick="setKw('re hon')">⚖️ Bên khác rẻ hơn</button>
+          <button type="button" class="chip" onclick="setKw('nha thue')">🏪 Mặt bằng thuê / Quán</button>
+          <button type="button" class="chip" onclick="setKw('zalo')">📱 Đang bận / Gửi Zalo</button>
+          <button type="button" class="chip" onclick="setKw('16kwh')">🔋 Hỏi bình 16kWh</button>
+        </div>
+      </div>
+      <div id="obj-list" class="grid-2"></div>
+    </section>
+
+    <!-- TAB 2: BILL CALCULATOR -->
+    <section id="tab-bill" class="hidden">
+      <div class="panel">
+        <span class="badge">⚡ CHUẨN BIỂU GIÁ ĐIỆN VIỆT NAM (6 BẬC QĐ 1279 • 5 BẬC QĐ 14 • KINH DOANH • SẢN XUẤT)</span>
+        <h2>Máy Tính Tiền Điện Nhanh 2 Chiều &amp; Tư Vấn Gói Solar</h2>
+        <div class="grid-12" style="margin-top:12px">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <button type="button" id="bm-m" class="chip active" onclick="setBM('M')">💵 Nhập Số Tiền (VNĐ)</button>
+              <button type="button" id="bm-k" class="chip" onclick="setBM('K')">🔢 Nhập Số Ký Điện (kWh)</button>
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:800;color:var(--muted)">1. Chọn loại biểu giá điện Việt Nam:</label>
+              <select id="b-type" onchange="calcBill()" style="margin-top:4px">
+                <option value="RES6">🏠 Sinh hoạt 6 bậc thang (QĐ 1279/QĐ-BCT - Hiện hành)</option>
+                <option value="RES5">🏠 Sinh hoạt 5 bậc mới (QĐ 14/2025/QĐ-TTg - Bậc 5: 3.967đ)</option>
+                <option value="BIZ">🏪 Kinh doanh - Dịch vụ hạ áp (Quán cafe, Nhà hàng, Spa)</option>
+                <option value="BIZ_PEAK">🏪 Kinh doanh Giờ Cao Điểm (5.422đ chưa VAT / 5.856đ có VAT)</option>
+                <option value="PROD">🏭 Sản xuất / Nhà xưởng / Nông nghiệp (&lt;6kV)</option>
+                <option value="ADMIN">🏥 Hành chính sự nghiệp / Trường học / Bệnh viện</option>
+                <option value="RENT">🏘️ Nhà trọ / Giá phẳng (3.500đ/kWh)</option>
+              </select>
+            </div>
+            <div id="box-m">
+              <label style="font-size:12px;font-weight:800;color:var(--amber)">2. Nhập tiền điện hàng tháng khách đóng (VNĐ):</label>
+              <input type="number" id="b-money" class="input" value="3000000" step="100000" oninput="calcBill()" style="margin-top:4px" />
+              <div class="chips">
+                <button type="button" class="chip" onclick="setM(1500000)">1.5 Triệu</button>
+                <button type="button" class="chip" onclick="setM(2500000)">2.5 Triệu</button>
+                <button type="button" class="chip active" onclick="setM(3000000)">3 Triệu</button>
+                <button type="button" class="chip" onclick="setM(4500000)">4.5 Triệu</button>
+                <button type="button" class="chip" onclick="setM(7000000)">7 Triệu</button>
+                <button type="button" class="chip" onclick="setM(12000000)">12 Triệu</button>
+              </div>
+            </div>
+            <div id="box-k" class="hidden">
+              <label style="font-size:12px;font-weight:800;color:var(--amber)">2. Nhập số ký điện hàng tháng (kWh):</label>
+              <input type="number" id="b-kwh" class="input" value="850" step="50" oninput="calcBill()" style="margin-top:4px" />
+            </div>
+            <div class="kpi">
+              <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:800;margin-bottom:6px">
+                <span>☀️ Tỷ lệ dùng điện ban ngày:</span>
+                <span id="day-lbl" style="color:var(--amber)">50% Ngày / 50% Đêm</span>
+              </div>
+              <input type="range" id="day-r" min="20" max="90" step="5" value="50" oninput="calcBill()" style="width:100%" />
+            </div>
+          </div>
+
+          <div>
+            <div class="kpi-grid">
+              <div class="kpi"><div class="lbl">Tổng điện tiêu thụ</div><div id="bo-kwh" class="val">862 kWh</div><div id="bo-day" class="sub" style="color:var(--amber)">~28.7 kWh/ngày</div></div>
+              <div class="kpi"><div class="lbl">Hóa đơn (Gồm VAT 8%)</div><div id="bo-money" class="val" style="color:var(--rose)">3.000.000 đ</div><div id="bo-prevat" class="sub" style="color:var(--muted)">Chưa VAT: 2.77tr</div></div>
+              <div class="kpi"><div class="lbl">Điện bậc cao (Bậc 4-6)</div><div id="bo-hi" class="val" style="color:var(--rose)">662 kWh</div><div id="bo-hipct" class="sub" style="color:var(--rose)">Chiếm 81% tiền!</div></div>
+              <div class="kpi"><div class="lbl">Đề xuất hệ Solar</div><div id="bo-sys" class="val" style="color:var(--emerald)">6 – 8 kWp</div><div id="bo-bat" class="sub" style="color:var(--emerald)">+ 1 Pin 16kWh</div></div>
+            </div>
+            <div style="overflow-x:auto;border:1px solid var(--border);border-radius:12px;margin-bottom:12px">
+              <table>
+                <thead><tr><th>Bậc thang</th><th>Định mức</th><th class="text-right">Chưa VAT</th><th class="text-right">Sau VAT 8%</th><th class="text-right">Số kWh</th><th class="text-right">Thành tiền</th></tr></thead>
+                <tbody id="b-tbody"></tbody>
+              </table>
+            </div>
+            <div class="script-box" style="border-color:var(--amber)">
+              <div class="script-hdr"><span style="color:var(--amber)">🎙️ Lời thoại đọc ngay cho khách:</span><button type="button" class="copy-btn" onclick="cp(document.getElementById('b-pitch').textContent)">📋 Copy</button></div>
+              <p id="b-pitch" style="font-size:13px;font-style:italic"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: BATTERY 16kWh & APPLIANCE CHECKER -->
+    <section id="tab-battery" class="hidden">
+      <div class="panel">
+        <span class="badge">🔋 QUY CHUẨN BÌNH PIN LƯU TRỮ LFP 16kWh (51.2V - 300Ah/314Ah)</span>
+        <h2>Kiểm Tra Phụ Tải Thiết Bị &amp; Đối Chiếu Bình Pin 16kWh</h2>
+        <div class="chips" style="margin-bottom:10px">
+          <button type="button" class="chip active" onclick="preset('SAMPLE')">⚡ Mẫu: 2 Máy lạnh 2HP + 2 Tủ lạnh + 3 Đèn ngủ (4h)</button>
+          <button type="button" class="chip" onclick="preset('NIGHT8')">🌙 Ngủ đêm 8h (2 Máy lạnh 1.5HP + 1 Tủ lạnh + 3 Đèn)</button>
+          <button type="button" class="chip" onclick="preset('HEAVY')">🏡 Biệt thự 4 Máy lạnh + Bếp từ (6h)</button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+          <input type="text" id="quick-str" class="input" style="flex:1;min-width:240px" value="2 máy lạnh 2hp + 2 tủ lạnh + 3 đèn ngủ trong 4h" placeholder="Nhập nhanh: 2 máy lạnh 2hp + 2 tủ lạnh + 3 đèn ngủ trong 4h" />
+          <button type="button" class="copy-btn" style="padding:12px 18px;font-size:13px;border-radius:12px" onclick="parseStr()">⚡ Phân Tích &amp; Tính Ngay</button>
+        </div>
+        <div class="grid-12">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <b style="font-size:12px;color:var(--muted)">DANH SÁCH THIẾT BỊ (CHỈNH SỐ LƯỢNG &amp; GIỜ)</b>
+              <select id="duty-mode" onchange="renderApps()" style="width:auto;padding:6px 10px;font-size:12px">
+                <option value="REAL">Thực tế Inverter đủ lạnh giảm tải (Khuyên dùng)</option>
+                <option value="MAX">Chạy Max 100% công suất danh định</option>
+              </select>
+            </div>
+            <div id="app-list"></div>
+          </div>
+          <div>
+            <div class="panel" style="border:2px solid var(--emerald);margin-bottom:0">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                <div>
+                  <div style="font-size:11px;font-weight:800;color:var(--emerald)">KIỂM ĐỊNH CHUẨN BÌNH PIN LFP 16kWh</div>
+                  <h3 id="bat-title" style="font-size:18px;font-weight:800">1 Bình 16kWh ĐỦ ĐÁP ỨNG TỐT!</h3>
+                </div>
+                <span id="bat-icon" style="font-size:28px">🟢</span>
+              </div>
+              <div class="kpi-grid" style="grid-template-columns:1fr 1fr">
+                <div class="kpi"><div class="lbl">Tổng điện tiêu thụ</div><div id="bat-kwh" class="val" style="color:var(--amber)">9.72 kWh</div><div class="sub">Thực dùng 16kWh: <b>13.6 kWh</b></div></div>
+                <div class="kpi"><div class="lbl">Công suất chạy cùng lúc</div><div id="bat-kw" class="val" style="color:var(--sky)">2.43 kW</div><div id="bat-max" class="sub">Max danh định: 3.71 kW</div></div>
+              </div>
+              <div style="font-size:12px;font-weight:700;display:flex;justify-content:space-between">
+                <span>Mức dùng trên Bình 16kWh (DOD 85% = 13.6kWh):</span>
+                <span id="bat-pct" style="color:var(--emerald)">71%</span>
+              </div>
+              <div class="progress-wrap"><div id="bat-bar" class="progress-bar" style="width:71%"></div></div>
+              <div id="bat-time" style="font-size:12px;margin-bottom:10px"></div>
+              <div id="bat-rec" class="psy-box" style="margin-bottom:10px"></div>
+              <div class="script-box" style="border-color:var(--amber)">
+                <div class="script-hdr"><span style="color:var(--amber)">🎙️ Kịch bản trả lời khách ngay:</span><button type="button" class="copy-btn" onclick="cp(document.getElementById('bat-pitch').textContent)">📋 Copy</button></div>
+                <p id="bat-pitch" style="font-size:13px;font-style:italic"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: GLOSSARY -->
+    <section id="tab-glossary" class="hidden">
+      <div class="panel">
+        <span class="badge">📘 CẨM NANG THUẬT NGỮ NGÀNH SOLAR (VÍ DỤ ĐỜI THƯỜNG DỄ HIỂU)</span>
+        <h2>Khái Niệm • Phân Tích Kỹ Thuật • Ví Dụ Bình Dân Cho Khách Miền Nam</h2>
+        <div id="gloss-list" class="grid-2" style="margin-top:12px"></div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="mobile-nav">
+    <button type="button" id="nm-objections" class="m-btn active" onclick="goTab('objections')"><span>🛡️</span><span>Từ Chối</span></button>
+    <button type="button" id="nm-bill" class="m-btn" onclick="goTab('bill')"><span>⚡</span><span>Tiền Điện</span></button>
+    <button type="button" id="nm-battery" class="m-btn" onclick="goTab('battery')"><span>🔋</span><span>Pin 16kWh</span></button>
+    <button type="button" id="nm-glossary" class="m-btn" onclick="goTab('glossary')"><span>📘</span><span>Cẩm Nang</span></button>
+  </nav>
+
+  <div id="toast" class="hidden">✅ Đã sao chép kịch bản!</div>
+
+  <script>
+    const norm = s => (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d');
+    const vnd = n => Math.round(n).toLocaleString('vi-VN') + ' đ';
+    function cp(t) {
+      navigator.clipboard?.writeText(t);
+      const el = document.getElementById('toast');
+      el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 2000);
+    }
+    function goTab(t) {
+      ['objections','bill','battery','glossary'].forEach(k => {
+        document.getElementById('tab-'+k).classList.toggle('hidden', k!==t);
+        document.getElementById('nd-'+k).classList.toggle('active', k===t);
+        document.getElementById('nm-'+k).classList.toggle('active', k===t);
+      });
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    const OBJS = [
+      { code:'#01', tag:'Giá & Hoàn Vốn', kw:'mac qua gia cao dat qua tram trieu hoan von', q:'“Sao mắc dữ vậy em? Đầu tư mấy chục, cả trăm triệu bao giờ mới lấy lại vốn!”', psy:'Khách nhìn cục tiền ban đầu nên ngợp, quên mất tiền điện đóng cho EVN mỗi tháng là tiền mất trắng.', s1:'Dạ em hiểu cảm giác của anh liền, tự nhiên bỏ ra mấy chục triệu ai cũng đắn đo hết! Nhưng anh tính thử với em nghen: đằng nào mỗi tháng nhà mình cũng đóng cho điện lực 3–4 triệu, 1 năm mất hơn 40 triệu, 4 năm mất 160 triệu mà tiền đó đi luôn không quay lại. Còn lắp hệ này là mình gom tiền điện hơn 3 năm lại để mua đứt "máy phát điện mặt trời" trên mái nhà, từ năm thứ 4 trở đi là xài điện miễn phí suốt 20 năm tiếp theo luôn anh!', s2:'Dạ nếu gửi 80 triệu vô ngân hàng giờ lãi 1 năm được có hơn 4 triệu (~350 ngàn/tháng). Trong khi đặt lên mái nhà ở miền Nam nắng đẹp, mỗi tháng nó đẻ ra 2.5 – 3 triệu tiền điện, lợi nhuận ~30%/năm gấp 5 lần gửi tiết kiệm mà còn làm mát mái nhà giảm 5 độ C nữa anh!', hook:'Hiện mỗi tháng nhà mình đóng tiền điện tầm 2 triệu rưỡi hay trên 3 triệu vậy anh, để em bấm máy tính thử mấy năm là thu hồi vốn?' },
+      { code:'#02', tag:'Đi làm ngày / Xài đêm', kw:'di lam ca ngay ban dem toi moi ve may lanh 16kwh', q:'“Nhà anh đi làm suốt ngày, tối mới về bật máy lạnh thì lắp điện mặt trời có tác dụng gì đâu?”', psy:'Khách nghĩ chỉ ban ngày mới có điện, chưa biết hệ Hybrid + Pin lưu trữ LFP 16kWh hiện nay.', s1:'Dạ anh nói đúng y bài toán của 80% nhà phố hiện nay luôn! Hồi xưa chưa có bình lưu trữ thì đi làm ban ngày là chịu, nhưng giờ bên em dùng hệ Hybrid kèm bình Pin LFP 16kWh. Ban ngày anh chị đi làm, tấm pin ở nhà tự hứng nắng sạc đầy vô bình 16kWh. Tối về bật 2–3 cái máy lạnh, tủ lạnh, đèn ngủ suốt đêm là rút điện từ bình đó ra xài, không tốn 1 chữ điện giá cao nào của EVN luôn!', s2:'Dạ hơn nữa ban ngày ở nhà tủ lạnh, camera, wifi vẫn ngốn 30% điện rồi anh. Sướng nhất là mùa nắng miền Nam lỡ cúp điện ban đêm, cả xóm nóng hầm hập thì nhà mình máy lạnh vẫn chạy êm ru nhờ bình Pin 16kWh chuyển mạch trong 0.01 giây!', hook:'Tối về nhà mình thường bật mấy phòng máy lạnh và bật khoảng mấy tiếng vậy anh, để em kiểm tra coi 1 bình 16kWh có dư sức gánh trọn đêm không?' },
+      { code:'#03', tag:'Hỏi Vợ / Chồng / Gia Đình', kw:'hoi vo hoi chong ban voi gia dinh ba xa ong xa', q:'“Để anh về hỏi lại vợ / hỏi ông xã / bàn với gia đình đã rồi có gì anh báo lại!”', psy:'Khách cần bảng số liệu dễ hiểu để thuyết phục người giữ tiền trong nhà hoặc từ chối khéo.', s1:'Dạ chuẩn luôn anh ơi, việc lớn trong nhà hai vợ chồng đồng lòng thì làm gì cũng suôn sẻ! Mà thường các chị ở nhà chưa nghe tư vấn sẽ hỏi ngay 3 câu: "Bao nhiêu tiền? Mỗi tháng giảm được mấy triệu? Có hư mái nhà không?". Để em gửi qua Zalo cho anh 1 bảng tính gọn đúng 1 trang theo hóa đơn nhà mình kèm video thực tế, tối anh mở cho chị coi 30 giây là chị ưng liền khỏi mất công anh giải thích dài dòng!', s2:'Dạ hay là cuối tuần này lúc có cả anh và chị ở nhà, kỹ thuật bên em chạy ngang ghé đo mái bằng flycam miễn phí 15 phút rồi lên bản vẽ 3D cho cả hai anh chị coi trực tiếp luôn, ưng thì làm không ưng anh em vui vẻ uống ly cà phê, hoàn toàn 0 đồng ạ!', hook:'Số điện thoại anh đang nghe máy là Zalo của anh luôn đúng không ạ, để em nhắn bảng tóm tắt qua liền cho anh?' },
+      { code:'#04', tag:'Pháp Lý & EVN', kw:'evn khong mua dien ban dien hoa luoi nghi dinh 135', q:'“Giờ điện lực EVN đâu có mua lại điện mặt trời nữa đâu mà lắp làm gì em?”', psy:'Khách còn tư duy bán điện giá FIT cũ mà quên rằng giá mua điện bậc 5-6 từ EVN hiện lên tới 3.737đ/kWh.', s1:'Dạ anh nắm thông tin chuẩn đó ạ! Nhưng anh để ý chỗ này thú vị lắm: hồi xưa EVN mua lại chỉ có ~1.900đ/chữ, trong khi hiện nay nhà mình đang phải MUA điện của EVN ở bậc 5, bậc 6 với giá tới 3.618đ – 3.737đ/chữ (điện kinh doanh cao điểm tới 5.855đ/chữ!). Nên giờ mình lắp theo chuẩn "Tự sản tự tiêu" (Nghị định 135) — làm ra chữ nào xài trực tiếp hoặc nạp vô bình Pin 16kWh xài ban đêm là tiết kiệm 3.737đ/chữ, lời gấp đôi bán rẻ cho EVN!', s2:'Dạ bên em gắn cảm biến bám tải thông minh (Zero Export): nhà dùng bao nhiêu phát bấy nhiêu và sạc đầy Pin lưu trữ, hoàn toàn hợp pháp theo Nghị định 135 mà không cần thủ tục xin bán điện rườm rà!', hook:'Nhà mình hiện đang xài đồng hồ điện sinh hoạt gia đình hay điện kinh doanh vậy anh ha?' },
+      { code:'#05', tag:'Thời Tiết Miền Nam', kw:'mua mua mua bao am u may mu khong co nang', q:'“Miền Nam có 6 tháng mùa mưa, mấy ngày mưa âm u lấy đâu ra điện mà xài?”', psy:'Khách tưởng tấm pin chạy bằng hơi nóng và nghĩ mưa miền Nam tối trời cả ngày như ngoài Bắc.', s1:'Dạ miền Nam mình được cái là mưa rào nhiệt đới: sáng tới trưa vẫn nắng tốt, chiều mới đổ cơn mưa 1–2 tiếng rồi tạnh chứ không mưa dầm u ám cả tháng như miền Bắc. Hơn nữa tấm pin N-Type thế hệ mới hấp thụ "bức xạ ánh sáng" chứ không phải nhiệt độ — nên trời chỉ cần sáng (dù có mây) vẫn phát điện đều 40–60% công suất!', s2:'Dạ mấy cơn mưa chiều ở Sài Gòn hay miền Tây thực ra lại là "người rửa tấm pin miễn phí" giúp trôi sạch bụi và làm mát pin, hôm sau nắng lên hiệu suất còn cao hơn. Tính bình quân cả năm miền Nam đạt 4.5 giờ nắng đỉnh/ngày, cao nhất Việt Nam!', hook:'Nhà mình ở quận/huyện nào vậy anh, để em tra đúng số giờ nắng chuẩn khu vực mình báo anh nghe?' },
+      { code:'#06', tag:'Mái Nhà & Kết Cấu', kw:'hu mai dot mai tham tran mai ton mai ngoi khoan mai gio bao', q:'“Anh sợ khoan cắt trên mái tôn / mái ngói làm dột nhà, thấm nước hoặc gió lốc tốc mái lắm!”', psy:'Khách xót ngôi nhà, sợ thợ tay ngang khoan thủng tôn gây dột mùa mưa.', s1:'Dạ anh lo cái này là quá chuẩn! Bên em thi công chuẩn kỹ thuật khắt khe: với mái tôn phù hợp sẽ dùng bát kẹp sóng tôn chuyên dụng KHÔNG KHOAN THỦNG TÔN; các vị trí bắt xà gồ đều dùng vít Inox 304 có ron cao su EPDM chịu nhiệt + bơm keo chống thấm Sikaflex 3 lớp và cam kết bảo hành chống thấm dột bằng văn bản suốt thời gian sử dụng!', s2:'Dạ dàn tấm pin kính cường lực lắp lên còn đóng vai trò như "mái nhà thứ 2" che nắng gắt 40 độ và mưa lớn trực tiếp cho lớp tôn bên dưới, giúp nhà mát hơn 4–6 độ C và tăng tuổi thọ mái tôn thêm chục năm nữa anh!', hook:'Mái nhà mình hiện tại là mái tôn, mái ngói hay sân thượng đúc bê tông vậy anh ha?' },
+      { code:'#07', tag:'An Toàn & PCCC', kw:'chay no chap dien nguy hiem pccc pin no set danh', q:'“Nghe nói lắp Pin lưu trữ với điện mặt trời dễ chập điện, cháy nổ nguy hiểm lắm phải không?”', psy:'Khách sợ pin trôi nổi như pin xe điện tự chế.', s1:'Dạ an toàn gia đình là số 1 nên anh hỏi cực kỳ xác đáng! Bên em tuyệt đối không dùng ắc quy chì hay pin Lithium thường, mà 100% dùng Pin lưu trữ LFP (Lithium Sắt Phosphate - giống công nghệ pin ô tô điện VinFast, BYD). Lõi LFP chịu nhiệt cực cao, không bắt lửa, không phát nổ và có mạch BMS tự ngắt trong 0.001 giây khi quá dòng!', s2:'Dạ tủ điện bên em trang bị bảo vệ 3 tầng: cáp Solar DC chống cháy 2 lớp vỏ chịu nắng 25 năm, CB DC/AC, chống sét lan truyền và tính năng AFCI tự ngắt tia lửa hồ quang điện ngay lập tức!', hook:'Để em gửi qua Zalo hình thực tế tủ điện chống sét và chứng nhận an toàn của bình Pin LFP 16kWh cho anh xem nghen?' },
+      { code:'#08', tag:'Bảo Hành & Uy Tín', kw:'bao hanh cong ty dep tiem pha san biet keu ai uy tin', q:'“Em nói bảo hành 10–25 năm nghe hay lắm, lỡ vài năm nữa công ty em nghỉ làm thì anh kêu ai?”', psy:'Khách sợ đội nhóm nhỏ lẻ lắp xong đem con bỏ chợ.', s1:'Dạ câu hỏi của anh đúng tâm lý người mua hàng thông thái! Bên em chỉ dùng thiết bị Tier-1 có trung tâm bảo hành chính hãng tại Việt Nam (Jinko/Longi/Canadian, Deye/Luxpower/Solis/Huawei). Mỗi thiết bị đều kích hoạt Bảo Hành Điện Tử Toàn Cầu theo số Serial — nghĩa là anh được BẢO HÀNH KÉP: vừa do công ty em bảo hành tận nhà tại miền Nam, vừa được chính hãng bảo hành trực tiếp theo mã Serial!', s2:'Dạ hệ thống có App giám sát từ xa 24/7, kỹ thuật bên em theo dõi online cùng anh, có bất kỳ cảnh báo nhỏ nào là hệ thống báo về trung tâm xử lý ngay!', hook:'Anh có muốn em gửi thử giao diện App theo dõi của 1 khách ở gần khu mình đã lắp 3 năm nay để anh coi thực tế không ạ?' },
+      { code:'#09', tag:'So Sánh Giá Đối Thủ', kw:'ben khac re hon doi thu bao gia re hon so sanh gia', q:'“Sao bên kia mới báo giá cho anh hệ giống vậy mà rẻ hơn bên em tới cả chục triệu?”', psy:'Khách chỉ nhìn tổng tiền mà chưa biết 3 chỗ dễ bị rút ruột vật tư.', s1:'Dạ có báo giá so sánh là quá tốt luôn anh! Trong ngành Solar này, chênh 10–15 triệu thường nằm ở đúng 3 chỗ ngầm: (1) Tấm pin & Bình lưu trữ là hàng loại A full CO/CQ hay pin loại B, cell pin lưu trữ tái chế/tháo khối xài 1 năm là sụt áp? (2) Khung nhôm định hình Anodized + ốc Inox 304 + dây DC chuẩn hay sắt hộp sơn thường dễ rỉ sét dột mái? (3) Tủ điện có chống sét lan truyền chuẩn không. Anh cứ gửi báo giá bên kia qua Zalo, em soi thông số kỹ thuật miễn phí giúp anh để anh không mua lầm!', s2:'Dạ hệ thống nằm phơi nắng mưa 25 năm trên mái nhà, tiết kiệm vài triệu lúc mua mà trúng cell pin tái chế hay dây điện dỏm thì tiền sửa sau này quá cha luôn anh!', hook:'Bên kia đang báo cho anh biến tần hãng nào và bình lưu trữ bao nhiêu kWh (mới 100% hay sao) vậy anh?' },
+      { code:'#10', tag:'Mặt Bằng Thuê / Quán Xá', kw:'nha thue mat bang thue quan cafe nha hang di doi', q:'“Anh đang thuê mặt bằng mở quán / nhà thuê, lắp lên mai mốt trả mặt bằng thì mất trắng à?”', psy:'Khách kinh doanh trả tiền điện rất cao nhưng sợ không tháo mang đi được.', s1:'Dạ điện kinh doanh đang chịu giá tới 3.500đ – 5.855đ/chữ (sau VAT), mà quán mình chạy máy lạnh ban ngày đúng lúc nắng đỉnh nên chỉ khoảng 2 năm là thu hồi sạch vốn rồi! Đặc biệt toàn bộ tấm pin, khung nhôm bắt bulong inox, biến tần và bình Pin lưu trữ đều THÁO RỜI DI DỜI ĐƯỢC 95% sang mặt bằng mới hoặc đem về nhà riêng lắp lại cực dễ dàng!', s2:'Dạ tiết kiệm được 5–10 triệu tiền điện mỗi tháng là quán mình tăng thêm đúng 5–10 triệu tiền lời ròng bỏ túi ngay lập tức đó anh!', hook:'Hợp đồng thuê mặt bằng của mình còn khoảng mấy năm và mỗi tháng tiền điện quán mình khoảng bao nhiêu vậy anh?' },
+      { code:'#11', tag:'Khách Bận / Đòi Gửi Zalo', kw:'dang ban lai xe gui zalo ranh anh coi', q:'“Anh đang bận / Đang lái xe, em cứ gửi qua Zalo đi rảnh anh coi!”', psy:'Khách bận thật hoặc muốn cúp máy nhanh; cần lấy 1 con số hóa đơn trong 10 giây để cá nhân hóa tin Zalo.', s1:'Dạ vâng anh lái xe an toàn nghen! Trước khi cúp máy anh cho em xin đúng 1 giây thôi: tiền điện nhà mình hàng tháng tầm 2 triệu hay trên 3 triệu vậy anh? Để em bấm sẵn bảng tính đúng mức tiền nhà mình rồi gửi Zalo, tối anh mở ra nhìn 5 giây là thấy ngay số tiền tiết kiệm khỏi đọc dài dòng ạ!', s2:'Dạ em kết bạn Zalo số này của anh gửi bảng tóm tắt 1 trang nghen, chiều sau 5h30 anh đỡ bận em hỗ trợ anh 2 phút ạ!', hook:'Lát anh mở Zalo bấm "Đồng ý kết bạn" giúp em để không bị ẩn tin nhắn anh nhé!' },
+      { code:'#12', tag:'Bài Toán Bình Pin 16kWh', kw:'16kwh 2 may lanh 2hp 2 tu lanh 3 den ngu 4h du khong', q:'“Nhà anh bật 2 máy lạnh 2HP + 2 tủ lạnh + 3 đèn ngủ trong 4 tiếng thì bình Pin 16kWh có đủ không?”', psy:'Khách test kiến thức thực tế về phụ tải và độ xả sâu DOD của bình lưu trữ 16kWh.', s1:'Dạ em tính chuẩn kỹ thuật ngay cho anh nè: 2 máy lạnh 2HP Inverter khi đủ lạnh chạy trung bình ~1.120W/máy (2 máy = 2.24kW), cộng 2 tủ lạnh (~160W thực chạy) và 3 đèn ngủ (~45W) => Tổng công suất chạy thực tế là ~2.45kW. Nhân cho 4 tiếng thì tổng điện tiêu thụ là ~9.8 kWh! Trong khi 1 bình Pin LFP 16kWh sau khi trừ ngưỡng bảo vệ xả sâu (DOD 85%) vẫn cho ra tới 13.6 kWh điện thực dùng (còn dư gần 4 chữ điện, hoặc chạy kéo dài được tới 5.5 tiếng)!', s2:'Dạ ngay cả khi 2 máy lạnh 2HP của anh là dòng máy cơ chạy tải cao liên tục trong 4 tiếng (~13.5 kWh) thì 1 bình 16kWh (51.2V - 314Ah) đi kèm biến tần Hybrid 6kW–8kW vẫn gánh vừa vặn. Nếu muốn bật xuyên đêm 8–10 tiếng cho cả 2 máy 2HP thì mình ghép 2 bình 16kWh (32kWh) là bao xài thả ga!', hook:'Hai máy lạnh 2HP nhà mình là dòng Inverter tiết kiệm điện hay máy cơ vậy anh, để em xuất bảng tính chi tiết gửi Zalo anh xem luôn?' }
+    ];
+
+    function setKw(k) { document.getElementById('obj-q').value = k; renderObjs(); }
+    function renderObjs() {
+      const q = norm(document.getElementById('obj-q').value);
+      const toks = q ? q.split(/\s+/) : [];
+      const list = OBJS.filter(o => {
+        if(!toks.length) return true;
+        const hay = norm(o.code+' '+o.tag+' '+o.kw+' '+o.q+' '+o.psy+' '+o.s1+' '+o.s2+' '+o.hook);
+        return toks.every(t => hay.includes(t));
+      });
+      document.getElementById('obj-cnt').textContent = list.length;
+      document.getElementById('obj-list').innerHTML = list.map(o => `
+        <article class="obj-card">
+          <div>
+            <div style="font-size:11px;font-weight:800;color:var(--muted);margin-bottom:4px">${o.code} • ${o.tag}</div>
+            <div class="obj-q">🗣️ ${o.q}</div>
+            <div class="psy-box" style="margin-top:8px"><b>🧠 Tâm lý khách:</b> ${o.psy}</div>
+            <div class="script-box">
+              <div class="script-hdr"><span style="color:var(--amber)">Cách 1 (EQ Đồng cảm &amp; Gần gũi Miền Nam):</span><button type="button" class="copy-btn" onclick="cp(decodeURIComponent('${encodeURIComponent(o.s1)}'))">📋 Copy</button></div>
+              <p style="font-size:13px">“${o.s1}”</p>
+            </div>
+            <div class="script-box">
+              <div class="script-hdr"><span style="color:var(--emerald)">Cách 2 (Phân tích Kinh tế &amp; Kỹ thuật):</span><button type="button" class="copy-btn" onclick="cp(decodeURIComponent('${encodeURIComponent(o.s2)}'))">📋 Copy</button></div>
+              <p style="font-size:13px">“${o.s2}”</p>
+            </div>
+          </div>
+          <div class="hook-box">
+            <span><b>🎯 Câu hỏi mở chốt hạ:</b> “${o.hook}”</span>
+            <button type="button" class="copy-btn" style="background:var(--emerald)" onclick="cp(decodeURIComponent('${encodeURIComponent(o.hook)}'))">Copy</button>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    let bm = 'M';
+    const T6 = [
+      {n:'Bậc 1',r:'0–50 kWh',s:50,p:1984},
+      {n:'Bậc 2',r:'51–100 kWh',s:50,p:2050},
+      {n:'Bậc 3',r:'101–200 kWh',s:100,p:2380},
+      {n:'Bậc 4',r:'201–300 kWh',s:100,p:2998},
+      {n:'Bậc 5',r:'301–400 kWh',s:100,p:3350},
+      {n:'Bậc 6',r:'Trên 400 kWh',s:Infinity,p:3460}
+    ];
+    const T5 = [
+      {n:'Bậc 1',r:'0–100 kWh',s:100,p:1984},
+      {n:'Bậc 2',r:'101–200 kWh',s:100,p:2380},
+      {n:'Bậc 3',r:'201–400 kWh',s:200,p:2998},
+      {n:'Bậc 4',r:'401–700 kWh',s:300,p:3571},
+      {n:'Bậc 5',r:'Trên 700 kWh',s:Infinity,p:3967}
+    ];
+    function setBM(m) {
+      bm = m;
+      document.getElementById('box-m').classList.toggle('hidden', m!=='M');
+      document.getElementById('box-k').classList.toggle('hidden', m!=='K');
+      document.getElementById('bm-m').classList.toggle('active', m==='M');
+      document.getElementById('bm-k').classList.toggle('active', m==='K');
+      calcBill();
+    }
+    function setM(v) { document.getElementById('b-money').value = v; setBM('M'); }
+    function calcBill() {
+      const type = document.getElementById('b-type').value;
+      const dayPct = parseInt(document.getElementById('day-r').value,10)||50;
+      document.getElementById('day-lbl').textContent = `${dayPct}% Ngày / ${100-dayPct}% Đêm`;
+      const vat = 1.08;
+      let kwh = parseFloat(document.getElementById('b-kwh').value)||0;
+      let money = parseFloat(document.getElementById('b-money').value)||0;
+      let rows = [], highKwh = 0, highMoney = 0, totalPre = 0;
+
+      if(type==='RES6' || type==='RES5') {
+        const tiers = type==='RES6' ? T6 : T5;
+        if(bm==='M') {
+          let rem = money/vat; kwh = 0;
+          for(const t of tiers) {
+            const maxC = t.s===Infinity ? Infinity : t.s*t.p;
+            if(rem >= maxC) { kwh += t.s; rem -= maxC; }
+            else { kwh += rem/t.p; break; }
+          }
+        }
+        let remK = kwh;
+        tiers.forEach(t => {
+          const u = Math.min(remK, t.s);
+          remK = Math.max(0, remK - u);
+          const cPre = u * t.p;
+          totalPre += cPre;
+          if(t.p >= 2900) { highKwh += u; highMoney += cPre*vat; }
+          rows.push({n:t.n, r:t.r, p:t.p, pv:Math.round(t.p*vat), u, c:cPre*vat, hi:t.p>=2900});
+        });
+      } else {
+        const mapP = {BIZ:3450, BIZ_PEAK:5422, PROD:2250, ADMIN:2150, RENT:3240};
+        const p = mapP[type]||3152;
+        if(bm==='M') kwh = (money/vat)/p;
+        totalPre = kwh * p;
+        highKwh = kwh; highMoney = totalPre*vat;
+        rows.push({n:'Đơn giá áp dụng', r:'Toàn bộ sản lượng', p, pv:Math.round(p*vat), u:kwh, c:totalPre*vat, hi:true});
+      }
+      const totalPost = totalPre * vat;
+      const highPct = totalPost>0 ? Math.round((highMoney/totalPost)*100) : 0;
+      const kwpMin = Math.max(3, Math.floor((kwh*0.82)/135));
+      const kwpMax = kwpMin + 2;
+      const nightKwh = (kwh/30)*((100-dayPct)/100);
+      const batRec = dayPct>=75 ? 'Hòa lưới bám tải' : (nightKwh<=14 ? '+ 1 Bình Pin 16kWh' : '+ 2 Bình Pin 16kWh');
+
+      document.getElementById('bo-kwh').textContent = Math.round(kwh).toLocaleString('vi-VN') + ' kWh';
+      document.getElementById('bo-day').textContent = `~${(kwh/30).toFixed(1)} kWh/ngày`;
+      document.getElementById('bo-money').textContent = vnd(totalPost);
+      document.getElementById('bo-prevat').textContent = 'Chưa VAT: ' + vnd(totalPre);
+      document.getElementById('bo-hi').textContent = Math.round(highKwh).toLocaleString('vi-VN') + ' kWh';
+      document.getElementById('bo-hipct').textContent = `Chiếm ${highPct}% tiền!`;
+      document.getElementById('bo-sys').textContent = `${kwpMin} – ${kwpMax} kWp`;
+      document.getElementById('bo-bat').textContent = batRec;
+
+      document.getElementById('b-tbody').innerHTML = rows.map(r => `
+        <tr style="${r.u>0.1 ? '' : 'opacity:0.35'}">
+          <td><b>${r.n}</b></td><td>${r.r}</td>
+          <td class="text-right">${r.p.toLocaleString('vi-VN')} đ</td>
+          <td class="text-right" style="font-weight:800;color:${r.hi?'var(--rose)':'inherit'}">${r.pv.toLocaleString('vi-VN')} đ</td>
+          <td class="text-right"><b>${Math.round(r.u)} kWh</b></td>
+          <td class="text-right"><b>${vnd(r.c)}</b></td>
+        </tr>
+      `).join('');
+
+      document.getElementById('b-pitch').textContent = `“Dạ với hóa đơn ${vnd(totalPost)}/tháng, nhà mình đang dùng khoảng ${Math.round(kwh)} chữ điện/tháng. Đáng chú ý là có tới ${Math.round(highKwh)} chữ điện bị tính ở mức giá đỉnh (3.238đ – 3.737đ/chữ sau VAT), chiếm ${highPct}% tổng hóa đơn! Ở miền Nam nắng tốt, anh/chị lắp hệ ${kwpMin}–${kwpMax}kWp (${batRec}) là mỗi tháng cắt giảm ngay khoảng ${vnd(totalPost*0.85)}, xóa sạch điện bậc cao luôn ạ!”`;
+    }
+
+    const APPS = [
+      {name:'❄️ Máy lạnh 2.0 HP (2 Ngựa)', w:1650, df:0.68, q:2, h:4},
+      {name:'❄️ Máy lạnh 1.5 HP (1.5 Ngựa)', w:1150, df:0.65, q:0, h:4},
+      {name:'❄️ Máy lạnh 1.0 HP (1 Ngựa)', w:820, df:0.65, q:0, h:4},
+      {name:'🧊 Tủ lạnh (150L–400L)', w:180, df:0.45, q:2, h:4},
+      {name:'💡 Đèn ngủ / Đèn LED', w:15, df:1.0, q:3, h:4},
+      {name:'🌀 Quạt máy / Quạt đứng', w:55, df:1.0, q:0, h:4},
+      {name:'📺 Tivi + Wifi + Camera', w:140, df:1.0, q:0, h:4},
+      {name:'🍲 Bếp từ / Nồi cơm điện', w:1800, df:0.8, q:0, h:1},
+      {name:'🚿 Máy bơm nước 1HP', w:750, df:1.0, q:0, h:1}
+    ];
+    function preset(p) {
+      APPS.forEach(a => a.q = 0);
+      if(p==='SAMPLE') {
+        APPS[0].q=2; APPS[0].h=4; APPS[3].q=2; APPS[3].h=4; APPS[4].q=3; APPS[4].h=4;
+        document.getElementById('quick-str').value = '2 máy lạnh 2hp + 2 tủ lạnh + 3 đèn ngủ trong 4h';
+      } else if(p==='NIGHT8') {
+        APPS[1].q=2; APPS[1].h=8; APPS[3].q=1; APPS[3].h=8; APPS[4].q=3; APPS[4].h=8;
+        document.getElementById('quick-str').value = '2 máy lạnh 1.5hp + 1 tủ lạnh + 3 đèn ngủ trong 8h';
+      } else {
+        APPS[0].q=2; APPS[0].h=6; APPS[1].q=2; APPS[1].h=6; APPS[7].q=1; APPS[7].h=1.5;
+        document.getElementById('quick-str').value = '2 máy lạnh 2hp + 2 máy lạnh 1.5hp + 1 bếp từ trong 6h';
+      }
+      renderApps();
+    }
+    function parseStr() {
+      const raw = document.getElementById('quick-str').value;
+      const hm = raw.match(/(\d+(?:[\.,]\d+)?)\s*(?:h|gio|giờ|tieng|tiếng)/i);
+      const gh = hm ? parseFloat(hm[1]) : 4;
+      APPS.forEach(a => { a.q=0; a.h=gh; });
+      raw.split(/\+|,|và|va/i).forEach(cl => {
+        const c = norm(cl);
+        const qm = c.match(/(\d+)/);
+        const q = qm ? parseInt(qm[1],10) : 1;
+        if(c.includes('may lanh')||c.includes('ml')) {
+          if(c.includes('2hp')||c.includes('2 hp')||c.includes('2 ngua')) APPS[0].q=q;
+          else if(c.includes('1hp')||c.includes('1 ngua')) APPS[2].q=q;
+          else APPS[1].q=q;
+        } else if(c.includes('tu lanh')) APPS[3].q=q;
+        else if(c.includes('den')) APPS[4].q=q;
+        else if(c.includes('quat')) APPS[5].q=q;
+        else if(c.includes('tivi')||c.includes('tv')) APPS[6].q=q;
+        else if(c.includes('bep')) APPS[7].q=q;
+        else if(c.includes('bom')) APPS[8].q=q;
+      });
+      renderApps();
+    }
+    function chgQ(i, d) { APPS[i].q = Math.max(0, APPS[i].q + d); renderApps(); }
+    function chgH(i, v) { APPS[i].h = Math.max(0.5, parseFloat(v)||4); renderApps(); }
+    function renderApps() {
+      const mode = document.getElementById('duty-mode').value;
+      let totKwh = 0, runKw = 0, maxKw = 0, parts = [];
+      document.getElementById('app-list').innerHTML = APPS.map((a,i) => {
+        const rw = Math.round(a.w * (mode==='REAL' ? a.df : 1));
+        const kwh = (a.q * rw * a.h)/1000;
+        if(a.q>0) {
+          totKwh += kwh; runKw += (a.q*rw)/1000; maxKw += (a.q*a.w)/1000;
+          parts.push(`${a.q} ${a.name.replace(/^[^\s]+\s/,'').split('(')[0].trim()} (${a.h}h)`);
+        }
+        return `
+          <div class="app-row ${a.q>0?'active':''}">
+            <div>
+              <div style="font-size:13px;font-weight:800">${a.name}</div>
+              <div style="font-size:11px;color:var(--muted)">Đỉnh: ${a.w}W • Thực chạy: <b>${rw}W/cái</b></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="stepper">
+                <button type="button" onclick="chgQ(${i},-1)">−</button>
+                <span>${a.q}</span>
+                <button type="button" onclick="chgQ(${i},1)">+</button>
+              </div>
+              <input type="number" value="${a.h}" step="0.5" onchange="chgH(${i},this.value)" class="input" style="width:62px;padding:6px;text-align:center;font-size:13px" />
+              <span style="font-size:12px;color:var(--muted)">h</span>
+              <b style="width:68px;text-align:right;font-size:13px;color:var(--emerald)">${kwh.toFixed(2)} kWh</b>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const usable = 13.6;
+      const pct = Math.round((totKwh/usable)*100);
+      const hrs = runKw>0 ? (usable/runKw).toFixed(1) : '∞';
+      document.getElementById('bat-kwh').textContent = totKwh.toFixed(2) + ' kWh';
+      document.getElementById('bat-kw').textContent = runKw.toFixed(2) + ' kW';
+      document.getElementById('bat-max').textContent = `Max danh định: ${maxKw.toFixed(2)} kW`;
+      document.getElementById('bat-pct').textContent = `${pct}% (${totKwh<=usable ? 'Dư '+(usable-totKwh).toFixed(2)+' kWh' : 'Vượt '+(totKwh-usable).toFixed(2)+' kWh'})`;
+      document.getElementById('bat-bar').style.width = Math.min(100, pct)+'%';
+      document.getElementById('bat-time').innerHTML = `⏱️ Với tải này, <b>1 bình 16kWh</b> chạy liên tục được <b>${hrs} giờ</b> (chuẩn bảo vệ DOD 85% = 13.6 kWh thực dùng).`;
+
+      const inv = maxKw<=5 ? '6kW' : (maxKw<=7.5 ? '8kW' : '10kW–12kW');
+      if(totKwh <= usable) {
+        document.getElementById('bat-title').textContent = '1 Bình Pin 16kWh ĐỦ ĐÁP ỨNG TỐT!';
+        document.getElementById('bat-icon').textContent = '🟢';
+        document.getElementById('bat-rec').innerHTML = `🎯 <b>Cấu hình chuẩn:</b> 1 Bình Pin LFP <b>16kWh (51.2V-314Ah)</b> + Biến tần Hybrid <b>${inv}</b>`;
+        document.getElementById('bat-pitch').textContent = `“Dạ anh/chị ơi, với dàn thiết bị (${parts.join(' + ')}) nhà mình, tổng công suất chạy thực tế chỉ khoảng ${runKw.toFixed(2)}kW và tiêu thụ hết ${totKwh.toFixed(2)} chữ điện (kWh). Trong khi 1 bình Pin 16kWh chuẩn LFP sau khi trừ ngưỡng bảo vệ pin an toàn (DOD 85%) vẫn cung cấp tới 13.6 chữ điện thực dùng! Như vậy 1 bình 16kWh kèm Biến tần ${inv} là DƯ SỨC gánh trọn vẹn tổ hợp này (chạy liên tục được tới ${hrs} tiếng)!”`;
+      } else {
+        const packs = Math.ceil(totKwh/13.5);
+        document.getElementById('bat-title').textContent = `1 Bình 16kWh KHÔNG ĐỦ (Cần ${packs} bình = ${packs*16}kWh)`;
+        document.getElementById('bat-icon').textContent = '🔴';
+        document.getElementById('bat-rec').innerHTML = `🎯 <b>Cấu hình đề xuất:</b> Ghép <b>${packs} Bình Pin 16kWh (Tổng ${packs*16}kWh)</b> + Biến tần Hybrid <b>${inv}</b>`;
+        document.getElementById('bat-pitch').textContent = `“Dạ với dàn tải (${parts.join(' + ')}) nhà mình, tổng điện tiêu thụ lên tới ${totKwh.toFixed(2)} chữ điện, vượt mức thực dùng an toàn (13.6 kWh) của 1 bình 16kWh. Để chạy êm ru suốt thời gian trên mà không hụt pin giữa chừng, bên em khuyến nghị ghép ${packs} bình 16kWh (tổng ${packs*16}kWh) kèm Biến tần ${inv} ạ!”`;
+      }
+    }
+
+    const GLOSS = [
+      {t:'kWp vs kWh (Chữ điện)', d:'kWp là công suất đỉnh của dàn tấm pin khi nắng chuẩn; kWh là số chữ điện tạo ra hoặc tiêu thụ.', ex:'Ví dụ nói với khách: "kWp giống phân khối xe máy 150cc, còn kWh là số km chạy được. Ở miền Nam 1 kWp mỗi ngày đẻ ra ~4.5 chữ điện (kWh)!"'},
+      {t:'Pin Lưu Trữ LFP 16kWh (51.2V - 314Ah)', d:'Pin Lithium Sắt Phosphate chống cháy nổ, tuổi thọ 6.000 chu kỳ sạc xả (~15 năm). Trừ ngưỡng bảo vệ xả sâu DOD 85% thì thực dùng đạt ~13.6 kWh.', ex:'Ví dụ nói với khách: "Bình LFP 16kWh giống cái bồn nước inox trữ 16 chữ điện ban ngày để tối mở vòi chạy 2 máy lạnh suốt đêm!"'},
+      {t:'Hòa Lưới Bám Tải (Zero Export)', d:'Cảm biến CT đo tải tiêu thụ trong nhà theo thời gian thực để phát đúng lượng điện nhà cần, không đẩy ngược ra lưới EVN.', ex:'Ví dụ nói với khách: "Nó khôn như phao cơ bồn nước: nhà xài bao nhiêu phát bấy nhiêu, đúng chuẩn Nghị định 135 tự sản tự tiêu!"'},
+      {t:'Hệ Hybrid vs Hệ Hòa Lưới Thường (On-grid)', d:'On-grid chỉ dùng ban ngày và tự ngắt khi EVN cúp điện. Hybrid vừa có bình Pin xài ban đêm vừa tự chuyển mạch UPS trong 0.01 giây khi cúp điện.', ex:'Ví dụ nói với khách: "Lắp Hybrid + Pin 16kWh thì cúp điện cái rụp cả xóm tối thui, nhà mình máy lạnh, Wifi vẫn chạy êm ru không chớp đèn!"'},
+      {t:'Tấm Pin N-Type TOPCon & Half-Cell', d:'Công nghệ tấm pin thế hệ mới hiệu suất >22.5%, chia đôi mạch cell giúp giảm nhiệt và chống bóng râm cục bộ.', ex:'Ví dụ nói với khách: "Bị bóng cây che nửa dưới thì nửa trên tấm pin vẫn phát điện bình thường, trời mây âm u vẫn ăn bức xạ sáng tốt!"'},
+      {t:'Giờ Nắng Đỉnh Miền Nam (4.5h/ngày)', d:'Số giờ quy chuẩn bức xạ đạt 1.000W/m². Miền Nam đạt 4.3 – 4.8 giờ/ngày cao nhất cả nước, giúp hoàn vốn nhanh gấp rưỡi miền Bắc.', ex:'Ví dụ nói với khách: "Người miền Nam mình lắp điện mặt trời là lời nhất cả nước vì nắng quanh năm, chỉ hơn 3 năm là thu hồi vốn!"'}
+    ];
+    function renderGloss() {
+      document.getElementById('gloss-list').innerHTML = GLOSS.map(g => `
+        <div class="obj-card">
+          <div>
+            <h3 style="font-size:15px;font-weight:800;color:var(--amber);margin-bottom:6px">${g.t}</h3>
+            <p style="font-size:13px;margin-bottom:8px"><b>📖 Phân tích:</b> ${g.d}</p>
+          </div>
+          <div class="psy-box">🎙️ ${g.ex}</div>
+        </div>
+      `).join('');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => { renderObjs(); calcBill(); renderApps(); renderGloss(); });
+  </script>
+</body>
+</html>>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Demo Deploy Vercel - Nguyễn Duy Tân</title>
   <style>
