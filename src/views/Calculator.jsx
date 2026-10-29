@@ -15,6 +15,7 @@ import {
   Leaf,
   Link2,
   MapPin,
+  Moon,
   MoveUpRight,
   Plus,
   RotateCcw,
@@ -267,6 +268,128 @@ function EnergyChart({ result }) {
   );
 }
 
+function EnergyFlow({ result, hybrid }) {
+  const [period, setPeriod] = useState("day");
+  const [selected, setSelected] = useState("home");
+  const day = period === "day";
+  const solar = day ? result.dailyGeneration : 0;
+  const demand = day ? result.daytimeKwh : result.nighttimeKwh;
+  const battery = day ? result.chargeEnergy : result.dischargeEnergy;
+  const grid = Math.max(
+    0,
+    demand - (day ? result.directEnergy : result.dischargeEnergy),
+  );
+  const explanations = {
+    solar: day
+      ? `Dự kiến tạo ${number(solar)} kWh trong một ngày. Ưu tiên dùng trực tiếp ${number(result.directEnergy)} kWh; còn ${number(result.surplusEnergy)} kWh dư sau khi nạp pin.`
+      : "Ban đêm không có sản lượng mặt trời. Tải dùng điện từ pin lưu trữ và điện lưới.",
+    home: `Nhu cầu ${day ? "ban ngày" : "ban đêm"} khoảng ${number(demand)} kWh. Điện lưới cần bù khoảng ${number(grid)} kWh theo cấu hình hiện tại.`,
+    grid: `Điện lưới bù khoảng ${number(grid)} kWh cho tải ${day ? "ngày" : "đêm"}. Phần điện mặt trời dư không được tính là điện lưới mua lại khi giá bán điện dư bằng 0.`,
+    battery: hybrid
+      ? day
+        ? `Pin nhận khoảng ${number(battery)} kWh/ngày. Phần điện cấp lại cho tải đêm còn ${number(result.dischargeEnergy)} kWh sau tổn hao nạp và xả.`
+        : `Pin cấp khoảng ${number(battery)} kWh cho tải đêm. Đây là lượng điện theo cân bằng một ngày, không phải mức pin đo trực tiếp.`
+      : "Phương án hòa lưới đang không dùng pin lưu trữ. Điện lưới cấp cho tải khi không có nắng.",
+  };
+  const nodes = [
+    ["solar", Sun, "Mặt trời", solar],
+    ["home", House, day ? "Tải ban ngày" : "Tải ban đêm", demand],
+    ["grid", Zap, "Điện lưới bù", grid],
+    [
+      "battery",
+      BatteryCharging,
+      day ? "Điện nạp pin" : "Pin cấp tải",
+      hybrid ? battery : 0,
+    ],
+  ];
+  return (
+    <div className={"calc-energy-flow " + (day ? "is-day" : "is-night")}>
+      <div className="calc-flow-toolbar">
+        <span>
+          <span className="calc-estimate-dot" /> Cân bằng năng lượng ước tính
+        </span>
+        <div
+          className="segmented"
+          role="group"
+          aria-label="Xem dòng năng lượng"
+        >
+          {[
+            ["day", Sun, "Ban ngày"],
+            ["night", Moon, "Ban đêm"],
+          ].map(([key, Icon, label]) => (
+            <button
+              key={key}
+              type="button"
+              className={period === key ? "active" : ""}
+              aria-pressed={period === key}
+              onClick={() => setPeriod(key)}
+            >
+              <Icon size={14} />
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="calc-flow-map">
+        <svg
+          viewBox="0 0 600 240"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path
+            className={day && result.directEnergy > 0 ? "flow-live" : ""}
+            d="M100 65 H300"
+          />
+          <path
+            className={grid > 0 ? "flow-live flow-grid" : ""}
+            d="M500 65 H300"
+          />
+          <path
+            className={day && hybrid && battery > 0 ? "flow-live" : ""}
+            d="M100 65 V190 H300"
+          />
+          <path
+            className={!day && hybrid && battery > 0 ? "flow-live" : ""}
+            d="M300 190 V65"
+          />
+        </svg>
+        {nodes.map(([key, Icon, label, value]) => (
+          <button
+            type="button"
+            key={key}
+            className={
+              "calc-flow-node flow-node-" +
+              key +
+              (selected === key ? " selected" : "") +
+              ((key === "solar" && !day) || (key === "battery" && !hybrid)
+                ? " inactive"
+                : "")
+            }
+            aria-pressed={selected === key}
+            onClick={() => setSelected(key)}
+          >
+            <span className="flow-node-icon">
+              <Icon size={24} strokeWidth={1.7} />
+            </span>
+            <span className="flow-node-label">{label}</span>
+            <strong>
+              {number(value)} <small>kWh</small>
+            </strong>
+          </button>
+        ))}
+      </div>
+      <p className="calc-flow-explanation" role="status">
+        <Info size={16} />
+        <span>{explanations[selected]}</span>
+      </p>
+      <small className="calc-flow-caption">
+        Chạm biểu tượng để xem cách phân bổ. Ước tính cho một ngày điển hình;
+        không phải giám sát hệ thống thực tế.
+      </small>
+    </div>
+  );
+}
+
 function ReturnChart({ result }) {
   const width = 620,
     height = 190,
@@ -369,6 +492,11 @@ export default function Calculator({
   );
   const [resultTab, setResultTab] = useState("overview");
   const [showAssumptions, setShowAssumptions] = useState(false);
+  const [openSections, setOpenSections] = useState(() =>
+    window.matchMedia("(max-width: 780px)").matches
+      ? ["usage"]
+      : ["usage", "roof", "system"],
+  );
   const consumed = useRef(initialPlan);
   const products = db?.products || [];
   const panels = useMemo(() => active(products, "panel"), [products]);
@@ -399,6 +527,28 @@ export default function Calculator({
     [input, products, db?.settings],
   );
   const update = (key, value) => setInput((old) => ({ ...old, [key]: value }));
+  const toggleSection = (key, opened) => {
+    setOpenSections((current) =>
+      current.includes(key) === opened
+        ? current
+        : opened
+          ? [...current, key]
+          : current.filter((item) => item !== key),
+    );
+  };
+  const jumpSection = (key) => {
+    setOpenSections((current) =>
+      current.includes(key) ? current : [...current, key],
+    );
+    requestAnimationFrame(() =>
+      document.getElementById("calc-section-" + key)?.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+        block: "start",
+      }),
+    );
+  };
   const numInput = (key, opts = {}) => (
     <input
       className="input"
@@ -451,16 +601,13 @@ export default function Calculator({
           <button
             className="btn btn-secondary calc-mobile-jump"
             onClick={() =>
-              document
-                .querySelector(".calc-results")
-                ?.scrollIntoView({
-                  behavior: window.matchMedia(
-                    "(prefers-reduced-motion: reduce)",
-                  ).matches
-                    ? "auto"
-                    : "smooth",
-                  block: "start",
-                })
+              document.querySelector(".calc-results")?.scrollIntoView({
+                behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+                  .matches
+                  ? "auto"
+                  : "smooth",
+                block: "start",
+              })
             }
           >
             <ArrowDown size={16} />
@@ -533,7 +680,29 @@ export default function Calculator({
               placeholder="VD: Nhà phố gia đình Anh Minh"
             />
           </Field>
-          <details className="calc-section" open>
+          <nav className="calc-input-jump" aria-label="Đi nhanh đến thông số">
+            {[
+              ["usage", "Nhu cầu"],
+              ["roof", "Mái nhà"],
+              ["system", "Hệ thống"],
+            ].map(([key, label]) => (
+              <button
+                type="button"
+                key={key}
+                aria-controls={"calc-section-" + key}
+                onClick={() => jumpSection(key)}
+              >
+                {label}
+                <ArrowDown size={12} />
+              </button>
+            ))}
+          </nav>
+          <details
+            id="calc-section-usage"
+            className="calc-section"
+            open={openSections.includes("usage")}
+            onToggle={(e) => toggleSection("usage", e.currentTarget.open)}
+          >
             <summary>
               <span>
                 <i>01</i>Điện đang sử dụng
@@ -596,11 +765,24 @@ export default function Calculator({
                       type="button"
                       key={n}
                       className={input.monthlyBill === n ? "active" : ""}
+                      aria-pressed={input.monthlyBill === n}
                       onClick={() => update("monthlyBill", n)}
                     >
                       {number(n / 1e6)}tr
                     </button>
                   ))}
+                </div>
+              )}
+              {input.inputMode === "bill" && result.valid && (
+                <div className="calc-bill-equivalent">
+                  <Zap size={15} />
+                  <span>
+                    Tương đương khoảng{" "}
+                    <strong>{number(result.monthlyKwh, 0)} kWh/tháng</strong>
+                    <small>
+                      Ước tính theo biểu giá và VAT đang chọn bên dưới.
+                    </small>
+                  </span>
                 </div>
               )}
               <Field label="Loại biểu giá">
@@ -696,7 +878,12 @@ export default function Calculator({
               </Field>
             </div>
           </details>
-          <details className="calc-section" open>
+          <details
+            id="calc-section-roof"
+            className="calc-section"
+            open={openSections.includes("roof")}
+            onToggle={(e) => toggleSection("roof", e.currentTarget.open)}
+          >
             <summary>
               <span>
                 <i>02</i>Mái nhà & khu vực
@@ -758,7 +945,12 @@ export default function Calculator({
               </label>
             </div>
           </details>
-          <details className="calc-section" open>
+          <details
+            id="calc-section-system"
+            className="calc-section"
+            open={openSections.includes("system")}
+            onToggle={(e) => toggleSection("system", e.currentTarget.open)}
+          >
             <summary>
               <span>
                 <i>03</i>Hệ thống & lưu trữ
@@ -1222,7 +1414,16 @@ export default function Calculator({
                         <Sun size={20} />
                       </span>
                     </div>
-                    <EnergyChart result={result} />
+                    <EnergyFlow
+                      result={result}
+                      hybrid={input.mode === "hybrid"}
+                    />
+                    <details className="calc-energy-details">
+                      <summary>
+                        Chi tiết tải và sản lượng <ChevronDown size={15} />
+                      </summary>
+                      <EnergyChart result={result} />
+                    </details>
                     {input.mode === "hybrid" && (
                       <div className="calc-backup-info">
                         <BatteryCharging size={18} />

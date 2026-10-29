@@ -13,8 +13,10 @@ import {
   Phone,
   MessageSquare,
   UserRound,
+  X,
+  AlertTriangle,
 } from "lucide-react";
-import { RecordDialog } from "./Customers";
+import { RecordDialog, cleanContactPhone, zaloContact } from "./Customers";
 import "./records.css";
 
 const statuses = [
@@ -60,15 +62,33 @@ export default function Care({ db, updateDb, notify }) {
     customers = db.customers || [],
     closed = (t) => ["Đã giải quyết", "Đã đóng"].includes(t.status),
     customer = (id) => customers.find((c) => c.id === id);
+  const overdue = (t) =>
+    !closed(t) && Boolean(t.dueDate && t.dueDate < dayNow());
+  const dueToday = (t) => !closed(t) && t.dueDate === dayNow();
+  const urgent = (t) => !closed(t) && ["Cao", "Khẩn cấp"].includes(t.priority);
   const list = tickets.filter(
     (t) =>
       (filter === "Tất cả" ||
-        (filter === "Đang mở" ? !closed(t) : t.status === filter)) &&
-      [t.title, t.description, t.serial, customer(t.customerId)?.name].some(
-        (v) =>
-          String(v || "")
-            .toLowerCase()
-            .includes(search.toLowerCase()),
+        (filter === "Đang mở"
+          ? !closed(t)
+          : filter === "Quá hạn"
+            ? overdue(t)
+            : filter === "Hôm nay"
+              ? dueToday(t)
+              : filter === "Ưu tiên cao"
+                ? urgent(t)
+                : t.status === filter)) &&
+      [
+        t.title,
+        t.description,
+        t.serial,
+        t.assignedTo,
+        customer(t.customerId)?.name,
+        customer(t.customerId)?.phone,
+      ].some((v) =>
+        String(v || "")
+          .toLowerCase()
+          .includes(search.toLowerCase()),
       ),
   );
   const change = (key, value) => setDraft((d) => ({ ...d, [key]: value }));
@@ -139,6 +159,7 @@ export default function Care({ db, updateDb, notify }) {
     notify("Đã xóa phiếu hỗ trợ.");
   };
   const quickStatus = (t, status) => {
+    if (t.status === status) return;
     const time = new Date().toISOString();
     updateDb((p) => ({
       ...p,
@@ -159,7 +180,7 @@ export default function Care({ db, updateDb, notify }) {
     notify("Đã cập nhật trạng thái.");
   };
   return (
-    <div className="record-page">
+    <div className="record-page care-page">
       <div className="page-heading">
         <div>
           <span className="eyebrow">AFTERCARE / ĐỒNG HÀNH SAU LẮP ĐẶT</span>
@@ -220,7 +241,7 @@ export default function Care({ db, updateDb, notify }) {
           </strong>
         </div>
       </div>
-      <section className="card">
+      <section className="card record-caresection">
         <div className="record-toolbar">
           <label className="record-search">
             <Search size={17} />
@@ -239,10 +260,50 @@ export default function Care({ db, updateDb, notify }) {
           >
             <option>Đang mở</option>
             <option>Tất cả</option>
+            <option>Quá hạn</option>
+            <option>Hôm nay</option>
+            <option>Ưu tiên cao</option>
             {statuses.map((x) => (
               <option key={x}>{x}</option>
             ))}
           </select>
+        </div>
+        <div
+          className="record-quickfilters"
+          aria-label="Chọn nhanh phiếu cần xử lý"
+        >
+          {[
+            ["Đang mở", LifeBuoy, tickets.filter((t) => !closed(t)).length],
+            ["Quá hạn", AlertTriangle, tickets.filter(overdue).length],
+            ["Hôm nay", CalendarDays, tickets.filter(dueToday).length],
+            ["Ưu tiên cao", Clock3, tickets.filter(urgent).length],
+          ].map(([value, Icon, count]) => (
+            <button
+              key={value}
+              className={filter === value ? "active" : ""}
+              aria-pressed={filter === value}
+              onClick={() => setFilter(value)}
+            >
+              <Icon size={14} />
+              {value}
+              <span>{count}</span>
+            </button>
+          ))}
+        </div>
+        <div className="record-resultsbar" role="status">
+          <span>
+            {list.length} / {tickets.length} phiếu hỗ trợ
+          </span>
+          {(search || filter !== "Đang mở") && (
+            <button
+              onClick={() => {
+                setSearch("");
+                setFilter("Đang mở");
+              }}
+            >
+              Đặt lại <X size={13} />
+            </button>
+          )}
         </div>
         {list.length ? (
           <div className="record-ticketgrid">
@@ -282,12 +343,11 @@ export default function Care({ db, updateDb, notify }) {
                   </span>
                   <small>{t.assignedTo || "Chưa phân công"}</small>
                 </div>
-                {customer(t.customerId)?.phone && (
+                {cleanContactPhone(customer(t.customerId)?.phone) && (
                   <div className="record-ticketcontact">
                     <a
                       href={
-                        "tel:" +
-                        customer(t.customerId).phone.replace(/[^+\d]/g, "")
+                        "tel:" + cleanContactPhone(customer(t.customerId).phone)
                       }
                     >
                       <Phone size={15} />
@@ -296,7 +356,7 @@ export default function Care({ db, updateDb, notify }) {
                     <a
                       href={
                         "https://zalo.me/" +
-                        customer(t.customerId).phone.replace(/\D/g, "")
+                        zaloContact(customer(t.customerId).phone)
                       }
                       target="_blank"
                       rel="noreferrer"

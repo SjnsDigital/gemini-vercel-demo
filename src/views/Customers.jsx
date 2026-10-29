@@ -30,6 +30,24 @@ const stages = [
   "Đã bàn giao",
   "Không tiếp tục",
 ];
+// Keep call and Zalo links valid for both local and +84 phone formats.
+export const cleanContactPhone = (value) => {
+  const compact = String(value || "")
+    .trim()
+    .replace(/[\s().-]/g, "")
+    .replace(/^00/, "+");
+  return /^\+?\d{8,15}$/.test(compact) ? compact : "";
+};
+export const contactIdentity = (value) => {
+  const phone = cleanContactPhone(value);
+  return phone.replace(/^(?:\+84|84)(\d{9})$/, "0$1");
+};
+export const zaloContact = (value) => {
+  const phone = contactIdentity(value);
+  return phone.startsWith("0")
+    ? "84" + phone.slice(1)
+    : phone.replace(/^\+/, "");
+};
 const uid = () => crypto.randomUUID();
 const today = () =>
   new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Ho_Chi_Minh" });
@@ -250,9 +268,16 @@ export default function Customers({
   const customers = db.customers || [],
     selectedCustomer = customers.find((x) => x.id === selected),
     money = (n) => Number(n || 0).toLocaleString("vi-VN") + " đ";
+  const needsContact = (c) =>
+    Boolean(
+      c.nextContact &&
+        c.nextContact <= today() &&
+        !["Không tiếp tục", "Đã bàn giao"].includes(c.status),
+    );
   const list = customers.filter(
     (c) =>
-      (filter === "Tất cả" || c.status === filter) &&
+      (filter === "Tất cả" ||
+        (filter === "Cần liên hệ" ? needsContact(c) : c.status === filter)) &&
       [c.name, c.phone, c.address, c.assignedTo].some((v) =>
         String(v || "")
           .toLocaleLowerCase("vi")
@@ -273,18 +298,20 @@ export default function Customers({
   const saveCustomer = (e) => {
     e.preventDefault();
     const name = draft.name.trim(),
-      phone = draft.phone.replace(/\s/g, "");
+      phone = cleanContactPhone(draft.phone);
     if (!name) {
       setError("Vui lòng nhập tên khách hàng.");
       return;
     }
-    if (phone && !/^\+?[0-9]{8,15}$/.test(phone)) {
+    if (draft.phone.trim() && !phone) {
       setError("Số điện thoại cần có 8–15 chữ số.");
       return;
     }
     const duplicate = customers.find(
       (c) =>
-        c.id !== draft.id && phone && c.phone?.replace(/\s/g, "") === phone,
+        c.id !== draft.id &&
+        phone &&
+        contactIdentity(c.phone) === contactIdentity(phone),
     );
     if (duplicate) {
       setError(
@@ -372,6 +399,16 @@ export default function Customers({
         setError("Thông số khảo sát phải là số không âm.");
         return;
       }
+    }
+    if (
+      survey.day !== "" &&
+      survey.day != null &&
+      (!Number.isFinite(Number(survey.day)) ||
+        Number(survey.day) < 0 ||
+        Number(survey.day) > 100)
+    ) {
+      setError("Tỷ lệ dùng ban ngày cần nằm trong khoảng 0–100%.");
+      return;
     }
     const time = new Date().toISOString();
     updateDb((p) => ({
@@ -513,13 +550,10 @@ export default function Customers({
         <div>
           <span>
             <CalendarDays size={16} />
-            Cần liên hệ hôm nay
+            Đến hạn liên hệ
           </span>
           <strong>
-            {customers
-              .filter((x) => x.nextContact && x.nextContact <= today())
-              .length.toString()
-              .padStart(2, "0")}
+            {customers.filter(needsContact).length.toString().padStart(2, "0")}
           </strong>
         </div>
         <div>
@@ -556,10 +590,56 @@ export default function Customers({
               onChange={(e) => setFilter(e.target.value)}
             >
               <option>Tất cả</option>
+              <option>Cần liên hệ</option>
               {stages.map((s) => (
                 <option key={s}>{s}</option>
               ))}
             </select>
+          </div>
+          <div
+            className="record-quickfilters"
+            aria-label="Chọn nhanh nhóm khách"
+          >
+            {[
+              ["Tất cả", Users, customers.length],
+              ["Cần liên hệ", Phone, customers.filter(needsContact).length],
+              [
+                "Hẹn khảo sát",
+                ClipboardList,
+                customers.filter((c) => c.status === "Hẹn khảo sát").length,
+              ],
+              [
+                "Đã chốt",
+                BadgeCheck,
+                customers.filter((c) => c.status === "Đã chốt").length,
+              ],
+            ].map(([value, Icon, count]) => (
+              <button
+                key={value}
+                className={filter === value ? "active" : ""}
+                aria-pressed={filter === value}
+                onClick={() => setFilter(value)}
+              >
+                <Icon size={14} />
+                {value}
+                <span>{count}</span>
+              </button>
+            ))}
+          </div>
+          <div className="record-resultsbar" role="status">
+            <span>
+              {list.length} / {customers.length} hồ sơ
+            </span>
+            {(search || filter !== "Tất cả") && (
+              <button
+                onClick={() => {
+                  setSearch("");
+                  setFilter("Tất cả");
+                }}
+              >
+                Xóa bộ lọc <X size={13} />
+              </button>
+            )}
           </div>
           {list.length ? (
             <div className="table-wrap">
@@ -607,13 +687,7 @@ export default function Customers({
                         </span>
                       </td>
                       <td data-label="Liên hệ tiếp theo">
-                        <span
-                          className={
-                            c.nextContact && c.nextContact <= today()
-                              ? "record-due"
-                              : ""
-                          }
-                        >
+                        <span className={needsContact(c) ? "record-due" : ""}>
                           {dateLabel(c.nextContact)}
                         </span>
                         <small className="record-sub">
@@ -621,10 +695,10 @@ export default function Customers({
                         </small>
                       </td>
                       <td className="record-rowactions">
-                        {c.phone && (
+                        {cleanContactPhone(c.phone) && (
                           <a
                             className="record-quickcall"
-                            href={"tel:" + c.phone.replace(/[^+\d]/g, "")}
+                            href={"tel:" + cleanContactPhone(c.phone)}
                             aria-label={"Gọi " + c.name}
                           >
                             <Phone size={16} />
@@ -701,11 +775,11 @@ export default function Customers({
               </p>
             </div>
             <div className="record-actions">
-              {selectedCustomer.phone && (
+              {cleanContactPhone(selectedCustomer.phone) && (
                 <>
                   <a
                     className="btn btn-secondary"
-                    href={"tel:" + selectedCustomer.phone}
+                    href={"tel:" + cleanContactPhone(selectedCustomer.phone)}
                   >
                     <Phone size={15} />
                     Gọi
@@ -713,8 +787,7 @@ export default function Customers({
                   <a
                     className="btn btn-secondary"
                     href={
-                      "https://zalo.me/" +
-                      selectedCustomer.phone.replace(/\D/g, "")
+                      "https://zalo.me/" + zaloContact(selectedCustomer.phone)
                     }
                     target="_blank"
                     rel="noreferrer"

@@ -37,6 +37,11 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import Brand from "./components/Brand.jsx";
+import PageAgent from "./components/PageAgent.jsx";
+import TaskBoard from "./components/TaskBoard.jsx";
+import PlanComparison from "./components/PlanComparison.jsx";
+import QuickActions from "./components/QuickActions.jsx";
+import { searchText } from "./lib/workflow.js";
 import heroPhoto from "./assets/solar-residence.webp";
 import heroPhotoMobile from "./assets/solar-residence-mobile.webp";
 import { normalizeAssetPaths } from "./lib/assets.js";
@@ -154,6 +159,7 @@ export default function App() {
       () => window.matchMedia("(max-width:780px)").matches,
     ),
     [mobileSearch, setMobileSearch] = useState(false),
+    [quickOpen, setQuickOpen] = useState(false),
     [settingsTab, setSettingsTab] = useState("company"),
     [customerFocus, setCustomerFocus] = useState(null),
     [catalogQuery, setCatalogQuery] = useState(""),
@@ -171,6 +177,20 @@ export default function App() {
     [planName, setPlanName] = useState(""),
     [tabChange, setTabChange] = useState(null);
   const notify = useCallback((message) => setToast(String(message)), []);
+  useEffect(() => {
+    const handler = (e) => {
+      if (
+        (e.metaKey || e.ctrlKey) &&
+        e.key.toLowerCase() === "k" &&
+        !document.querySelector('[role="dialog"], dialog[open]')
+      ) {
+        e.preventDefault();
+        setQuickOpen(true);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
   useEffect(() => {
     if (mobileSearch)
       requestAnimationFrame(() =>
@@ -359,7 +379,7 @@ export default function App() {
   const matches = query.trim()
     ? db.customers
         .filter((c) =>
-          `${c.name} ${c.phone}`.toLowerCase().includes(query.toLowerCase()),
+          searchText(`${c.name} ${c.phone}`).includes(searchText(query)),
         )
         .slice(0, 3)
         .map((c) => ({
@@ -370,7 +390,7 @@ export default function App() {
         }))
         .concat(
           db.plans
-            .filter((p) => p.name?.toLowerCase().includes(query.toLowerCase()))
+            .filter((p) => searchText(p.name).includes(searchText(query)))
             .slice(0, 3)
             .map((p) => ({
               title: p.name,
@@ -380,9 +400,7 @@ export default function App() {
             })),
           db.products
             .filter((p) =>
-              `${p.brand} ${p.model}`
-                .toLowerCase()
-                .includes(query.toLowerCase()),
+              searchText(`${p.brand} ${p.model}`).includes(searchText(query)),
             )
             .slice(0, 4)
             .map((p) => ({
@@ -555,6 +573,14 @@ export default function App() {
               )}
             </div>
             <button
+              className="icon-btn quick-actions-trigger"
+              aria-label="Mở thao tác nhanh"
+              title="Thao tác nhanh (Ctrl / ⌘ K)"
+              onClick={() => setQuickOpen(true)}
+            >
+              <Zap size={19} />
+            </button>
+            <button
               className={"connection-pill " + (saveError ? "error" : "")}
               onClick={() =>
                 session
@@ -635,6 +661,7 @@ export default function App() {
               </div>
             }
           >
+            <PageAgent key={route} route={route} />
             {route === "overview" && (
               <Dashboard
                 db={db}
@@ -777,6 +804,9 @@ export default function App() {
           <span>Thêm</span>
         </button>
       </nav>
+      {quickOpen && (
+        <QuickActions onClose={() => setQuickOpen(false)} navigate={navigate} />
+      )}
       {toast && (
         <div className="toast" role="status">
           <Check size={17} />
@@ -879,40 +909,12 @@ export default function App() {
 }
 
 function Dashboard({ db, updateDb, navigate, result, notify }) {
-  const [task, setTask] = useState(""),
-    [showTask, setShowTask] = useState(false);
   const won = db.customers.filter((x) =>
       ["Đã chốt", "Đã bàn giao"].includes(x.status),
     ).length,
-    quoteValue = db.quotes.reduce((a, q) => a + (Number(q.total) || 0), 0),
-    today = new Date().toLocaleDateString("en-CA", {
-      timeZone: "Asia/Ho_Chi_Minh",
-    }),
-    todos = [
-      ...db.tasks.filter((t) => !t.done).map((t) => ({ ...t, kind: "task" })),
-      ...db.customers
-        .filter((c) => c.nextContact && c.nextContact <= today)
-        .map((c) => ({
-          id: c.id,
-          title: "Liên hệ " + c.name,
-          kind: "customer",
-          date: c.nextContact,
-        })),
-    ];
-  const addTask = (e) => {
-    e.preventDefault();
-    if (!task.trim()) return;
-    updateDb((p) => ({
-      ...p,
-      tasks: [
-        { id: uid(), title: task.trim(), date: today, done: false },
-        ...p.tasks,
-      ],
-    }));
-    setTask("");
-    setShowTask(false);
-    notify("Đã thêm việc cần làm.");
-  };
+    draftValue = db.quotes
+      .filter((q) => q.status === "draft")
+      .reduce((a, q) => a + (Number(q.total) || 0), 0);
   return (
     <div className="dashboard enter">
       <div className="page-heading">
@@ -1021,8 +1023,8 @@ function Dashboard({ db, updateDb, navigate, result, notify }) {
             FileText,
             "Báo giá",
             db.quotes.length,
-            quoteValue
-              ? currency(quoteValue) + " tổng giá trị nháp"
+            draftValue
+              ? currency(draftValue) + " tổng giá trị nháp"
               : "Sẵn sàng cho cơ hội đầu tiên",
             "purple",
             "quotes",
@@ -1105,96 +1107,12 @@ function Dashboard({ db, updateDb, navigate, result, notify }) {
             <ArrowUpRight size={16} />
           </button>
         </section>
-        <section id="today-tasks" className="card task-card">
-          <div className="card-head">
-            <div>
-              <span className="eyebrow">ĐỪNG BỎ LỠ CƠ HỘI</span>
-              <h2>
-                Việc cần làm<span className="count-dot">{todos.length}</span>
-              </h2>
-            </div>
-            <button
-              className="icon-btn light"
-              aria-label="Thêm công việc"
-              onClick={() => setShowTask(!showTask)}
-            >
-              <Plus size={18} />
-            </button>
-          </div>
-          {showTask && (
-            <form onSubmit={addTask} className="task-form">
-              <input
-                className="input"
-                aria-label="Nội dung công việc"
-                placeholder="Gọi lại khách, hẹn khảo sát..."
-                value={task}
-                onChange={(e) => setTask(e.target.value)}
-                required
-                autoFocus
-              />
-              <button className="btn btn-primary btn-sm">Thêm</button>
-            </form>
-          )}
-          {todos.length ? (
-            <div className="task-list">
-              {todos.slice(0, 5).map((t) => (
-                <div className="task-row" key={t.kind + t.id}>
-                  <button
-                    className="task-check"
-                    aria-label={"Hoàn thành " + t.title}
-                    onClick={() =>
-                      t.kind === "task"
-                        ? updateDb((p) => ({
-                            ...p,
-                            tasks: p.tasks.map((x) =>
-                              x.id === t.id ? { ...x, done: true } : x,
-                            ),
-                          }))
-                        : navigate("customers")
-                    }
-                  >
-                    <Check size={13} />
-                  </button>
-                  <div>
-                    <strong>{t.title}</strong>
-                    <small>
-                      {t.kind === "customer" ? "Lịch gọi lại" : "Việc của bạn"}{" "}
-                      · {date(t.date)}
-                    </small>
-                  </div>
-                  <ArrowUpRight size={14} />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="task-empty">
-              <span>
-                <Check size={25} />
-              </span>
-              <h3>Một khởi đầu gọn gàng.</h3>
-              <p>
-                Thêm lịch gọi lại hoặc việc cần làm.
-                <br />
-                Cơ hội tốt bắt đầu từ đúng thời điểm.
-              </p>
-              <button
-                className="btn btn-secondary btn-sm"
-                onClick={() => setShowTask(true)}
-              >
-                <Plus size={14} />
-                Thêm việc đầu tiên
-              </button>
-            </div>
-          )}
-          <div className="task-tip">
-            <Sun size={18} />
-            <p>
-              Chủ động một cuộc gọi.
-              <br />
-              <b>Mở thêm một cơ hội.</b>
-            </p>
-          </div>
-        </section>
+        <TaskBoard
+          db={db}
+          updateDb={updateDb}
+          navigate={navigate}
+          notify={notify}
+        />
       </div>
       <div className="dashboard-columns bottom">
         <section className="card recent-card">
@@ -1397,7 +1315,7 @@ function QuickLookup({ db, navigate }) {
 function Plans({ db, updateDb, navigate, onShare, notify }) {
   const [q, setQ] = useState("");
   const rows = db.plans.filter((p) =>
-    p.name?.toLowerCase().includes(q.toLowerCase()),
+    searchText(p.name).includes(searchText(q)),
   );
   return (
     <div className="enter">
@@ -1428,6 +1346,11 @@ function Plans({ db, updateDb, navigate, onShare, notify }) {
         </div>
         <span className="muted">{rows.length} phương án</span>
       </div>
+      <PlanComparison
+        plans={db.plans}
+        onOpen={(p) => navigate("calculator", p)}
+        onQuote={(p) => navigate("quotes", p)}
+      />
       {rows.length ? (
         <div className="plans-grid">
           {rows.map((p) => (
@@ -1559,7 +1482,13 @@ const articles = [
 ];
 function Knowledge() {
   const [q, setQ] = useState(""),
-    [copied, setCopied] = useState(-1);
+    [topic, setTopic] = useState("Tất cả"),
+    [copied, setCopied] = useState("");
+  const visible = articles.filter(
+    (a) =>
+      (topic === "Tất cả" || a[0] === topic) &&
+      searchText(a.join(" ")).includes(searchText(q)),
+  );
   return (
     <div className="enter">
       <div className="page-heading">
@@ -1579,62 +1508,82 @@ function Knowledge() {
           onChange={(e) => setQ(e.target.value)}
         />
       </div>
+      <div className="knowledge-topics" aria-label="Chủ đề tư vấn">
+        {["Tất cả", ...articles.map((a) => a[0])].map((t) => (
+          <button
+            key={t}
+            aria-pressed={topic === t}
+            className={topic === t ? "active" : ""}
+            onClick={() => setTopic(t)}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+      <p className="knowledge-result-count">
+        {visible.length} nội dung phù hợp
+      </p>
+      {!visible.length && (
+        <div className="card knowledge-no-results">
+          <BookOpen size={30} />
+          <h2>Chưa tìm thấy nội dung.</h2>
+          <p>Thử từ khóa khác hoặc xem tất cả chủ đề.</p>
+          <button
+            className="btn btn-secondary"
+            onClick={() => {
+              setTopic("Tất cả");
+              setQ("");
+            }}
+          >
+            Xóa bộ lọc
+          </button>
+        </div>
+      )}
       <div className="knowledge-grid">
-        {articles
-          .filter((a) =>
-            a
-              .join(" ")
-              .toLowerCase()
-              .normalize("NFD")
-              .replace(/[\u0300-\u036f]/g, "")
-              .includes(
-                q
-                  .toLowerCase()
-                  .normalize("NFD")
-                  .replace(/[\u0300-\u036f]/g, ""),
-              ),
-          )
-          .map(([tag, title, body], i) => (
-            <article className="card knowledge-card" key={title}>
-              <div className="knowledge-topic-heading">
-                <span className="knowledge-topic-icon">
-                  {React.createElement(
-                    [
-                      CalendarDays,
-                      BatteryCharging,
-                      ShieldCheck,
-                      House,
-                      Zap,
-                      FileText,
-                      HeartHandshake,
-                      Share2,
-                    ][articles.findIndex(([name]) => name === tag) % 8],
-                    { size: 23, strokeWidth: 1.7 },
-                  )}
-                </span>
-                <span className="badge">{tag}</span>
-              </div>
-              <h2>{title}</h2>
+        {visible.map(([tag, title, body], i) => (
+          <article className="card knowledge-card" key={title}>
+            <div className="knowledge-topic-heading">
+              <span className="knowledge-topic-icon">
+                {React.createElement(
+                  [
+                    CalendarDays,
+                    BatteryCharging,
+                    ShieldCheck,
+                    House,
+                    Zap,
+                    FileText,
+                    HeartHandshake,
+                    Share2,
+                  ][articles.findIndex(([name]) => name === tag) % 8],
+                  { size: 23, strokeWidth: 1.7 },
+                )}
+              </span>
+              <span className="badge">{tag}</span>
+            </div>
+            <h2>{title}</h2>
+            <details>
+              <summary>Xem gợi ý tư vấn</summary>
               <p>{body}</p>
-              <button
-                className="text-action"
-                onClick={async () => {
-                  try {
-                    await navigator.clipboard.writeText(body);
-                    setCopied(i);
-                    setTimeout(() => setCopied(-1), 2000);
-                  } catch {
-                    alert(
-                      "Trình duyệt không cho sao chép tự động. Hãy chọn đoạn văn để sao chép.",
-                    );
-                  }
-                }}
-              >
-                {copied === i ? <Check size={14} /> : <Copy size={14} />}
-                {copied === i ? "Đã sao chép" : "Sao chép gợi ý"}
-              </button>
-            </article>
-          ))}
+            </details>
+            <button
+              className="text-action"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(body);
+                  setCopied(title);
+                  setTimeout(() => setCopied(""), 2000);
+                } catch {
+                  alert(
+                    "Trình duyệt không cho sao chép tự động. Hãy chọn đoạn văn để sao chép.",
+                  );
+                }
+              }}
+            >
+              {copied === title ? <Check size={14} /> : <Copy size={14} />}
+              {copied === title ? "Đã sao chép" : "Sao chép gợi ý"}
+            </button>
+          </article>
+        ))}
       </div>
     </div>
   );

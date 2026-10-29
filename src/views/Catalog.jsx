@@ -23,6 +23,7 @@ import {
   Wrench,
   Layers3,
   PlugZap,
+  X,
 } from "lucide-react";
 import { categories } from "../lib/seed";
 import { RecordDialog } from "./Customers";
@@ -151,6 +152,7 @@ export default function Catalog({
     [category, setCategory] = useState("all"),
     [status, setStatus] = useState("active"),
     [layout, setLayout] = useState("grid"),
+    [sort, setSort] = useState("default"),
     [draft, setDraft] = useState(null),
     [error, setError] = useState("");
   useEffect(() => {
@@ -158,21 +160,32 @@ export default function Catalog({
     if (initialQuery) setStatus("all");
   }, [initialQuery]);
   const products = db.products || [],
-    filtered = products.filter(
-      (p) =>
-        (category === "all" || p.category === category) &&
-        (status === "all" ||
-          (status === "active"
-            ? p.active
-            : status === "unverified"
-              ? !p.verified
-              : !p.active)) &&
-        [p.brand, p.model, p.description].some((s) =>
-          String(s || "")
-            .toLowerCase()
-            .includes(search.toLowerCase()),
-        ),
-    );
+    filtered = products
+      .filter(
+        (p) =>
+          (category === "all" || p.category === category) &&
+          (status === "all" ||
+            (status === "active"
+              ? p.active
+              : status === "unverified"
+                ? p.active && !p.verified
+                : !p.active)) &&
+          [p.brand, p.model, p.description].some((s) =>
+            String(s || "")
+              .toLowerCase()
+              .includes(search.toLowerCase()),
+          ),
+      )
+      .sort((a, b) =>
+        sort === "name"
+          ? `${a.brand} ${a.model}`.localeCompare(`${b.brand} ${b.model}`, "vi")
+          : sort === "price-up"
+            ? (Number(a.price) > 0 ? Number(a.price) : Infinity) -
+              (Number(b.price) > 0 ? Number(b.price) : Infinity)
+            : sort === "price-down"
+              ? Number(b.price || 0) - Number(a.price || 0)
+              : 0,
+      );
   const brands = [...new Set(products.map((p) => p.brand))].sort();
   const change = (key, value) => setDraft((d) => ({ ...d, [key]: value }));
   const save = (e) => {
@@ -443,6 +456,36 @@ export default function Catalog({
               </button>
             </div>
           </div>
+        </div>
+        <div className="record-resultsbar record-catalogresults">
+          <span role="status">
+            {filtered.length} / {products.length} thiết bị
+          </span>
+          <label className="record-sort">
+            <span>Sắp xếp</span>
+            <select
+              className="select"
+              aria-label="Sắp xếp thiết bị"
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+            >
+              <option value="default">Mặc định</option>
+              <option value="name">Hãng / model A–Z</option>
+              <option value="price-up">Giá thấp → cao</option>
+              <option value="price-down">Giá cao → thấp</option>
+            </select>
+          </label>
+          {(search || category !== "all" || status !== "active") && (
+            <button
+              onClick={() => {
+                setSearch("");
+                setCategory("all");
+                setStatus("active");
+              }}
+            >
+              Đặt lại <X size={13} />
+            </button>
+          )}
         </div>
         {filtered.length ? (
           layout === "grid" ? (

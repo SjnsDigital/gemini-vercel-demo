@@ -5,6 +5,305 @@
   --calc-border: #e7e5dc;
   --calc-surface: #fffefa;
 }
+
+/* Compact input navigation and an interactive view of the calculation, not telemetry. */
+.calc-input-jump {
+  display: flex;
+  gap: 5px;
+  padding: 0 20px 17px;
+}
+.calc-input-jump button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex: 1;
+  min-width: 0;
+  min-height: 38px;
+  padding: 7px 5px;
+  border: 1px solid #dce8f5;
+  border-radius: 8px;
+  background: #f3f8fd;
+  color: #2265a0;
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+.calc-input-jump button:hover {
+  border-color: #93bce1;
+  background: #e9f3fc;
+}
+.calc-section[id] {
+  scroll-margin-top: 95px;
+}
+.calc-bill-equivalent {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 11px;
+  border-radius: 8px;
+  background: #eff7fe;
+  color: #326b9b;
+  font-size: 10px;
+  line-height: 1.7;
+  margin: 11px 0 18px;
+}
+.calc-bill-equivalent > svg {
+  flex: none;
+  margin-top: 3px;
+}
+.calc-bill-equivalent strong,
+.calc-bill-equivalent small {
+  display: block;
+}
+.calc-bill-equivalent strong {
+  font-size: 13px;
+}
+.calc-bill-equivalent small {
+  font-size: 9px;
+  color: #67829b;
+}
+.calc-flow-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.calc-flow-toolbar > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #637e94;
+  font-size: 10px;
+}
+.calc-estimate-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ef962d;
+}
+.calculator-workspace .calc-flow-toolbar .segmented {
+  background: #f0f5fa;
+  border-color: #e0eaf5;
+}
+.calculator-workspace .calc-flow-toolbar .segmented button {
+  min-width: 92px;
+  min-height: 38px;
+  color: #607d95;
+}
+.calculator-workspace .calc-flow-toolbar .segmented button.active {
+  background: #fff;
+  color: #1765a6;
+}
+.calc-flow-map {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: 130px 120px;
+  align-items: center;
+  margin-top: 10px;
+  background: radial-gradient(ellipse at 50% 50%, #eaf4fc, transparent 70%);
+}
+.calc-flow-map > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 250px;
+  pointer-events: none;
+}
+.calc-flow-map > svg > path {
+  fill: none;
+  stroke: #d4e2ef;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  stroke-linejoin: round;
+}
+.calc-flow-map > svg > path.flow-live {
+  stroke: #ec953d;
+  stroke-dasharray: 5 7;
+  animation: calc-energy-travel 1.8s linear infinite;
+}
+.calc-flow-map > svg > path.flow-grid {
+  stroke: #377bb6;
+}
+@keyframes calc-energy-travel {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+.calc-flow-node {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  min-height: 98px;
+  margin: 0 8px;
+  padding: 8px 5px;
+  border-radius: 12px;
+  border: 1px solid #e1ebf5;
+  background: #f5f9fd;
+  color: #365a77;
+  font: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 5px;
+  transition:
+    border-color 0.18s,
+    background 0.18s,
+    box-shadow 0.18s;
+}
+.calc-flow-node.selected {
+  background: #fff;
+  border-color: #70a9d6;
+  box-shadow: 0 5px 20px #1b568b12;
+}
+.calc-flow-node:hover {
+  border-color: #8cb5d8;
+}
+.calc-flow-node:focus-visible,
+.calc-input-jump button:focus-visible {
+  outline: 3px solid #2c80c0;
+  outline-offset: 3px;
+}
+.flow-node-battery {
+  grid-column: 2;
+}
+.flow-node-icon {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #e9f2fb;
+  color: #2878b5;
+}
+.flow-node-solar .flow-node-icon {
+  color: #d57f1d;
+  background: #fff0da;
+}
+.flow-node-battery .flow-node-icon {
+  color: #27877c;
+  background: #e4f4ef;
+}
+.calc-flow-node.inactive .flow-node-icon {
+  color: #8b9aab;
+  background: #eaf0f5;
+}
+.flow-node-label {
+  font-size: 10px;
+  line-height: 1.6;
+}
+.calc-flow-node strong {
+  font-size: 15px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.calc-flow-node strong small {
+  font-size: 9px;
+  font-weight: 400;
+  color: #6e869c;
+}
+.calc-flow-explanation {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 4px 0 9px;
+  padding: 13px;
+  border: 1px solid #dceaf7;
+  border-radius: 10px;
+  background: #f4f9ff;
+  color: #456781;
+  font-size: 11px;
+  line-height: 1.8;
+  min-height: 70px;
+}
+.calc-flow-explanation svg {
+  flex: none;
+  margin-top: 3px;
+  color: #2f7cb9;
+}
+.calc-flow-caption {
+  display: block;
+  color: #7b8ea0;
+  font-size: 10px;
+  line-height: 1.8;
+}
+.calc-energy-details {
+  margin-top: 15px;
+  border-top: 1px solid #e4edf6;
+}
+.calc-energy-details > summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  list-style: none;
+  color: #3072a6;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.calc-energy-details > summary::-webkit-details-marker {
+  display: none;
+}
+.calc-energy-details[open] > summary > svg {
+  transform: rotate(180deg);
+}
+@media (max-width: 780px) {
+  .calc-input-jump {
+    padding: 0 18px 16px;
+  }
+  .calc-input-jump button {
+    min-height: 44px;
+    font-size: 11px;
+  }
+  .calc-bill-equivalent {
+    font-size: 11px;
+  }
+  .calc-bill-equivalent strong {
+    font-size: 14px;
+  }
+  .calc-bill-equivalent small {
+    font-size: 10px;
+  }
+  .calc-flow-toolbar .segmented {
+    width: 100%;
+  }
+  .calculator-workspace .calc-flow-toolbar .segmented button {
+    min-height: 44px;
+    font-size: 12px;
+  }
+  .calc-flow-node {
+    margin: 0 3px;
+    min-height: 100px;
+    border-radius: 9px;
+    padding: 8px 2px;
+  }
+  .flow-node-label {
+    font-size: 10px;
+  }
+  .calc-flow-node strong {
+    font-size: 14px;
+  }
+  .calc-flow-explanation {
+    font-size: 11px;
+    min-height: 95px;
+  }
+  .calc-flow-caption {
+    font-size: 10px;
+  }
+  .calc-energy-details > summary {
+    font-size: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .calc-flow-map > svg > path.flow-live {
+    animation: none;
+  }
+}
 .calculator-workspace .calc-heading {
   align-items: flex-end;
   gap: 20px;

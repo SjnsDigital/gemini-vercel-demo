@@ -18,7 +18,6 @@ Giá/datasheet/biểu giá và điều kiện khảo sát vẫn cần doanh nghi
 
 Nguồn cũ được giữ ở lịch sử Git. Không đưa hồ sơ khách thật trong file gốc lên bản public.
 
-
 ## Nâng cấp hình ảnh/mobile 2.1 — 30/10/2026
 
 - Thay mô hình nhà SVG sai phối cảnh bằng ảnh minh họa mới; xuất WebP desktop/mobile, giữ ảnh gốc ngoài checkout.
@@ -28,3 +27,16 @@ Nguồn cũ được giữ ở lịch sử Git. Không đưa hồ sơ khách th�
 - Kiểm tra tất cả10route Pages-base ở360/390/768/1280px, không tràn trang, khôngpageerror; logo, hero và ảnh danh mục có nội dung ảnh thật, không404.
 - Nghiệp vụ khách/khảo sát/CSKH/danh mục/sao lưu và PDF/QR/chia sẻ tiếp tục qua kiểm thử trình duyệt. Chọn6ảnh khảo sát một lần đã được kiểm tra lưu đủ6.
 - Bộ test assetpaths kiểm tra ảnh nguồn/ảnh trong bản sao lưu chuyển đổi giữa domainroot và prefixPages, giữ nguyên ảnh upload và URL bên ngoài.
+
+## Nâng cấp tương tác 2.2 — 30/10/2026
+
+- `npm test`: năm file kiểm tra đều đạt, bổ sung so sánh bản chụp (không đổi giá theo danh mục hiện tại, xử lý giá thiếu/ROI, cảnh báo giả định khác nhau), ngày Việt Nam, lọc lịch hẹn và tìm kiếm không dấu.
+- `npm run build:pages`: build production đúng prefix `/gemini-vercel-demo/`, JS khởi đầu khoảng95 KB gzip; PDF/QR và các trang nghiệp vụ tiếp tục tải khi cần.
+- `tests/e2e/interactions.py` trên build Pages: mười SVG theo trang, mẹo mở/thu gọn, dừng/chạy và giảm chuyển động; menu thao tác nhanh tìm không dấu/Enter/Escape/trả focus; tạo lịch việc tương lai, sửa ngày, hoàn thành/mở lại, xóa/hoàn tác, nạp lại dữ liệu, mở đúng hồ sơ từ lịch gọi; cẩm nang tìm/lọc/mở chi tiết/xóa bộ lọc. Không lỗi JavaScript.
+- `tests/e2e/navigation.py` trên build Pages: đủ10trang ở360/390/768/1280px, không tràn ngang, logo/hero/tài nguyên tải thành công, menu mobile và tìm kiếm đúng focus, sao lưu mở đúng tab.
+- Máy tính production: nhóm mái/hệ thống ban đầu thu gọn trên điện thoại, nút chuyển nhóm mở đúng thông số; preset5triệu cập nhật số tính; sơ đồ ngày/đêm và chú giải theo số năng lượng hiện tại, không có dữ liệu giám sát giả.
+- So sánh tích hợp: chọn2/3phương án, chặn lựa chọn thứ4, chênh lệch đúng bản A, cảnh báo khác hóa đơn/nắng; nút mở máy tính/tạo báo giá hoạt động; không tràn trang360/390/768px, không lỗiJS hoặc tải tài nguyên.
+- Toàn bộ records và quotes E2E chạy lại trên build Pages đều đạt: CRUD/khảo sát/CSV/CSKH/sao lưu/khôi phục;13dòng báo giá, xuấtPDF/PNGA4, revision, QR1080, linkkhách độc lập, guardkhảo sát/giá và chặn sốtấm không đồng nhất.
+- Kiểm tra chuyên biệt360px: điện thoại+84/0 được nhận là cùng số, liên kết gọi/Zalo đúng, tỷ lệngày ngoài0–100bị chặn; lọcCSKH bỏphiếuđãđóng, sắp xếpgiá không đẩygiáchưa có lênđầu.
+
+Bằng chứng trình duyệt được lưu ngoài mã nguồn tại `/workspace/kimsolar-v22-validation/`. Không có backend AI hoặc giám sát điện thực tế mới; SVG là hướng dẫn và mô hình ước tính. Giới hạn Supabase thật và xác minh dữ liệu thương mại từ bản2.0/2.1 vẫn áp dụng.

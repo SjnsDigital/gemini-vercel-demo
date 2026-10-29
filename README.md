@@ -1,4 +1,4 @@
-# Kim Solar Workspace 2.1
+# Kim Solar Workspace 2.2
 
 Bản công khai: **https://sjnsdigital.github.io/gemini-vercel-demo/** — GitHub Pages, không cần đăng nhập Vercel.
 
@@ -67,3 +67,15 @@ Thanh điều hướng mobile có Tổng quan/Tính toán/Báo giá/Khách hàng
 Bản build Pages: `npm run build:pages`. Xuất bản nguyên thư mục `dist-pages` lên nhánh `gh-pages`; cần `.nojekyll`. Dữ liệu và đường dẫn ảnh đã hỗ trợ prefix `/gemini-vercel-demo/`, kể cả ảnh trong bản sao lưu cũ. Nhánh `main` và website Vercel cũ không bị thay đổi bởi luồng phát hành Pages.
 
 Bản public không có hồ sơ khách thật được cài sẵn. Dữ liệu nhập trên một trình duyệt vẫn là dữ liệu riêng của trình duyệt đó; không tự công khai lên GitHub Pages.
+
+## Bản 2.2 — tương tác trực tiếp và thao tác gọn
+
+- Mười trang có hình SVG riêng theo vai trò, mẹo mở/thu gọn và nút dừng chuyển động. Đây là hướng dẫn sử dụng, không phải dịch vụ AI từ máy chủ. SVG không cần thư viện hoạt ảnh hoặc tải ảnh ngoài; tôn trọng cài đặt giảm chuyển động.
+- Nút tia chớp trên header hoặc Ctrl/⌘ K mở menu thao tác nhanh. Tìm không dấu, Enter mở kết quả đầu; Escape đóng và trả focus.
+- Bảng việc hỗ trợ ngày hẹn, sửa, hoàn thành/mở lại, xóa/hoàn tác và lọc đến hạn/tất cả/đã xong. Lịch gọi lại mở đúng khách hàng; ngày theo múi giờ Việt Nam.
+- Màn tính có sơ đồ điện ngày/đêm tương tác theo kết quả tính hiện tại. Dữ liệu là ước tính ngày điển hình; không phải dữ liệu giám sát thời gian thực. Trên điện thoại các nhóm thông số được thu gọn, có điều hướng đến từng nhóm.
+- So sánh tối đa ba bản chụp phương án theo công suất, đầu tư, sản lượng, tiết kiệm, hoàn vốn và lưu trữ. Hiển thị chênh lệch với bản A, cảnh báo đầu vào khác nhau, không xếp hạng giá rẻ là tốt nhất. Thiếu giá hoặc dữ liệu không hợp lệ thì không suy diễn hoàn vốn.
+- Hàng đợi khách cần liên hệ/hẹn khảo sát, CSKH quá hạn/hôm nay/ưu tiên cao; sắp xếp thiết bị theo hãng hoặc giá, giá chưa có nằm cuối. Chuẩn hóa số gọi/Zalo và chống trùng số địa phương với +84.
+- Cẩm nang có chủ đề lọc nhanh, tìm không dấu, nội dung thu gọn và sao chép gợi ý.
+
+Kiểm tra tương tác bổ sung: `tests/e2e/interactions.py`. Bộ test dữ liệu còn kiểm tra biên ngày Việt Nam, hàng đợi đến hạn và bảo toàn dữ liệu bản chụp khi so sánh. Xuất bản tĩnh tiếp tục dùng GitHub Pages với tên miền hiện tại và không yêu cầu đăng nhập.

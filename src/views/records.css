@@ -1676,3 +1676,142 @@
 .record-ticketcontact a > svg {
   flex: none;
 }
+
+/* Compact, touch-friendly queues keep frequent jobs one tap away. */
+.record-quickfilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 16px 24px 4px;
+}
+.record-quickfilters > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 42px;
+  border: 1px solid #dfe8f1;
+  border-radius: 12px;
+  padding: 8px 11px;
+  color: #60758a;
+  background: #fff;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+.record-quickfilters > button.active {
+  color: #165f9d;
+  background: #eef6ff;
+  border-color: #b9d7f0;
+}
+.record-quickfilters > button > span {
+  border-radius: 6px;
+  padding: 2px 5px;
+  background: #edf1f5;
+  font-size: 10px;
+  font-weight: 600;
+}
+.record-quickfilters > button.active > span {
+  background: #dcecff;
+}
+.record-quickfilters > button > svg {
+  flex: none;
+}
+.record-resultsbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 24px 14px;
+  color: #6c7f90;
+  font-size: 11px;
+}
+.record-resultsbar > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  border: none;
+  background: transparent;
+  color: #236eaa;
+  font: inherit;
+  cursor: pointer;
+}
+.record-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.record-sort .select {
+  min-width: 170px;
+  font-size: 11px;
+}
+.record-catalogresults {
+  padding-top: 16px;
+}
+@media (max-width: 650px) {
+  .record-quickfilters {
+    padding: 14px 16px 4px;
+    gap: 7px;
+  }
+  .record-quickfilters > button {
+    min-height: 44px;
+    font-size: 11px;
+    flex: 1 1 calc(50% - 7px);
+  }
+  .record-resultsbar {
+    padding: 10px 16px 12px;
+    font-size: 11px;
+  }
+  .record-resultsbar > button {
+    min-height: 44px;
+  }
+  .record-sort {
+    flex: 1;
+    justify-content: flex-end;
+  }
+  .record-sort .select {
+    min-width: 0;
+    max-width: 180px;
+    font-size: 13px;
+    min-height: 44px;
+  }
+  .record-catalogresults {
+    gap: 8px;
+  }
+  .record-catalogresults > span {
+    flex-basis: 100%;
+  }
+}
+.record-caresection {
+  padding: 0 !important;
+  overflow: hidden;
+}
+.record-ticket {
+  border-color: #dce6f0;
+  background: linear-gradient(150deg, #f9fcff, #fff 45%);
+}
+.record-tickettitle {
+  color: #183c5d;
+}
+.record-tickettype,
+.record-ticket > p,
+.record-ticketcustomer small {
+  color: #6c8194;
+}
+.record-ticketfoot {
+  border-color: #e2ebf3;
+}
+.care-page .record-due {
+  color: #cf6038;
+}
+@media (max-width: 650px) {
+  .record-ticketgrid {
+    padding: 16px;
+    gap: 12px;
+  }
+  .record-ticket {
+    padding: 16px;
+  }
+}
