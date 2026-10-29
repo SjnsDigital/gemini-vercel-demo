@@ -17,3 +17,14 @@ Chưa có tài khoản/dự án Supabase thực tế để chạy schema và ki�
 Giá/datasheet/biểu giá và điều kiện khảo sát vẫn cần doanh nghiệp xác minh. Giao diện không được xem như cam kết sản lượng hoặc hồ sơ thiết kế kỹ thuật.
 
 Nguồn cũ được giữ ở lịch sử Git. Không đưa hồ sơ khách thật trong file gốc lên bản public.
+
+
+## Nâng cấp hình ảnh/mobile 2.1 — 30/10/2026
+
+- Thay mô hình nhà SVG sai phối cảnh bằng ảnh minh họa mới; xuất WebP desktop/mobile, giữ ảnh gốc ngoài checkout.
+- Logo Kim Solar chính thức giữ đúng tỷ lệ ở các điểm thương hiệu, PDF và ảnh1080.
+- Icon ngữ nghĩa, màu tương phản; menu mobile và nút44px, chữ form16px; bỏ chuông thông báo giả và dấu xổ xuống ở nhãn không có menu.
+- So sánh năng lượng trên dashboard dùng số tính toán thực của kịch bản; bỏ đồ thị mùa vụ được dựng sẵn.
+- Kiểm tra tất cả10route Pages-base ở360/390/768/1280px, không tràn trang, khôngpageerror; logo, hero và ảnh danh mục có nội dung ảnh thật, không404.
+- Nghiệp vụ khách/khảo sát/CSKH/danh mục/sao lưu và PDF/QR/chia sẻ tiếp tục qua kiểm thử trình duyệt. Chọn6ảnh khảo sát một lần đã được kiểm tra lưu đủ6.
+- Bộ test assetpaths kiểm tra ảnh nguồn/ảnh trong bản sao lưu chuyển đổi giữa domainroot và prefixPages, giữ nguyên ảnh upload và URL bên ngoài.

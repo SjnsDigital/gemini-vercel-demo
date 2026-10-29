@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowUpRight,
   ArrowRight,
+  ArrowDown,
   BatteryCharging,
   Check,
   ChevronDown,
@@ -52,7 +53,10 @@ function Field({ label, hint, children, wide = false }) {
   return (
     <label className={"field calc-field" + (wide ? " field-wide" : "")}>
       <span>{label}</span>
-      {children}
+      {React.isValidElement(children) &&
+      ["input", "select", "textarea"].includes(children.type)
+        ? React.cloneElement(children, { "aria-label": label })
+        : children}
       {hint && <small>{hint}</small>}
     </label>
   );
@@ -444,6 +448,24 @@ export default function Calculator({
           <p>Từ một hóa đơn điện đến một phương án có đủ cơ sở để tư vấn.</p>
         </div>
         <div className="calc-heading-actions">
+          <button
+            className="btn btn-secondary calc-mobile-jump"
+            onClick={() =>
+              document
+                .querySelector(".calc-results")
+                ?.scrollIntoView({
+                  behavior: window.matchMedia(
+                    "(prefers-reduced-motion: reduce)",
+                  ).matches
+                    ? "auto"
+                    : "smooth",
+                  block: "start",
+                })
+            }
+          >
+            <ArrowDown size={16} />
+            Xem kết quả
+          </button>
           <button
             className="btn btn-secondary"
             onClick={() => {

@@ -1318,3 +1318,306 @@
     animation: none;
   }
 }
+
+/* Sales tools must remain legible and easy to operate with one hand. */
+.ks-tabs button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 40px;
+}
+.ks-icon-btn {
+  min-width: 40px;
+  min-height: 40px;
+}
+.ks-q-stats small,
+.ks-small-note,
+.ks-block-muted {
+  color: #64705f;
+}
+.ks-q-list-card th {
+  color: #62705a;
+}
+.ks-editor-table td > input,
+.ks-editor-table td > textarea {
+  font-size: 12px;
+  min-height: 38px;
+}
+.ks-price-check {
+  align-items: center;
+  min-height: 40px;
+  font-size: 11px;
+  color: #5f7056;
+  cursor: pointer;
+}
+.ks-price-check input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  flex-shrink: 0;
+}
+.ks-q-issues li {
+  line-height: 1.7;
+}
+@media (max-width: 650px) {
+  .ks-quote-dialog {
+    max-width: calc(100vw - 12px);
+    width: 100%;
+    max-height: calc(100dvh - 12px);
+    margin: 6px auto;
+    border-radius: 14px;
+  }
+  .ks-modal-head {
+    padding: 17px 15px;
+  }
+  .ks-modal-head h2 {
+    font-size: 20px;
+    line-height: 1.45;
+  }
+  .ks-dialog .ks-icon-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .ks-q-toolbar {
+    padding: 10px 12px;
+    gap: 9px;
+  }
+  .ks-q-toolbar .ks-tabs {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 5px;
+    width: 100%;
+  }
+  .ks-q-toolbar .ks-tabs button {
+    min-height: 44px;
+    font-size: 11px;
+    padding: 9px 7px;
+    gap: 6px;
+  }
+  .ks-q-toolbar .ks-q-export {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
+  .ks-q-export .btn {
+    min-height: 44px;
+    font-size: 12px;
+    padding: 10px;
+  }
+  .ks-q-editor {
+    padding: 13px;
+  }
+  .ks-q-editor .card {
+    padding: 16px;
+    border-radius: 12px;
+  }
+  .ks-q-editor .card-head {
+    gap: 10px;
+    margin-bottom: 17px;
+  }
+  .ks-q-editor .field > span {
+    font-size: 12px;
+    color: var(--ink, #26372c);
+  }
+  .ks-q-editor .input,
+  .ks-q-editor select {
+    font-size: 14px;
+    min-height: 46px;
+  }
+  .ks-q-editor .form-grid {
+    gap: 16px;
+  }
+  .ks-q-editor .table-wrap {
+    overflow: visible;
+  }
+  .ks-editor-table {
+    display: block;
+    min-width: 0;
+    border: 0;
+  }
+  .ks-editor-table thead {
+    display: none;
+  }
+  .ks-editor-table tbody {
+    display: grid;
+    gap: 15px;
+  }
+  .ks-editor-table tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+    padding: 15px;
+    border: 1px solid var(--line, #e2e8db);
+    border-radius: 11px;
+    background: #fbfcf8;
+  }
+  .ks-editor-table td {
+    display: block;
+    padding: 0;
+    border: 0;
+    width: auto;
+    min-width: 0;
+    font-size: 13px;
+  }
+  .ks-editor-table td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 7px;
+    font-size: 11px;
+    line-height: 1.4;
+    font-weight: 600;
+    color: #63705b;
+  }
+  .ks-editor-table td:first-child {
+    grid-column: 1/-1;
+    min-width: 0;
+    width: auto;
+  }
+  .ks-editor-table td:first-child > input,
+  .ks-editor-table td:first-child > textarea,
+  .ks-editor-table td:nth-child(2) > input,
+  .ks-editor-table td:nth-child(3) > input {
+    width: 100%;
+    min-height: 44px;
+    padding: 11px 10px;
+    font-size: 13px;
+  }
+  .ks-editor-table td:first-child > textarea {
+    min-height: 68px;
+    resize: vertical;
+  }
+  .ks-editor-table td:first-child > .ks-unit-input {
+    min-height: 38px;
+    max-width: 100px;
+    font-size: 12px;
+  }
+  .ks-editor-table td:nth-child(4) {
+    grid-column: 1/-1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 11px 0;
+    border-top: 1px solid #e5eadf;
+    border-bottom: 1px solid #e5eadf;
+    font-weight: 650;
+    white-space: normal;
+    gap: 8px;
+  }
+  .ks-editor-table td:nth-child(4)::before {
+    margin: 0;
+  }
+  .ks-editor-table td:nth-child(5) {
+    grid-column: 1/-1;
+  }
+  .ks-editor-table td:nth-child(5)::before {
+    display: none;
+  }
+  .ks-editor-table td:nth-child(6) {
+    grid-column: 1/-1;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: -6px;
+  }
+  .ks-price-check {
+    min-height: 44px;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .ks-price-check input {
+    width: 21px;
+    height: 21px;
+  }
+  .ks-add-row > button,
+  .ks-add-row > .input {
+    min-height: 46px;
+  }
+  .ks-q-bottom {
+    padding: 12px 13px calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+  .ks-q-bottom > p {
+    color: #64705b;
+    font-size: 10px;
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+  .ks-q-bottom > div {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .ks-q-bottom > div > .btn:only-child {
+    grid-column: 1/-1;
+  }
+  .ks-q-bottom .btn {
+    min-height: 46px;
+    font-size: 11px;
+    white-space: normal;
+    padding: 10px 8px;
+  }
+  .ks-q-list-tools {
+    gap: 13px;
+  }
+  .ks-search input {
+    font-size: 13px;
+    min-height: 28px;
+  }
+  .ks-filter-pills {
+    width: 100%;
+  }
+  .ks-filter-pills button {
+    min-height: 42px;
+    font-size: 11px;
+  }
+  .ks-quote-number {
+    min-height: 44px;
+  }
+  .ks-q-stats span,
+  .ks-q-stats small {
+    font-size: 11px;
+    line-height: 1.5;
+  }
+}
+
+.ks-q-logo .quote-brand {
+  display: block;
+  width: 185px;
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 10px;
+}
+.ks-q-logo .quote-brand img {
+  display: block;
+  max-width: 100%;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+@media (max-width: 650px) {
+  .ks-quote-dialog > .ks-modal-head {
+    padding: 12px 15px;
+  }
+  .ks-quote-dialog > .ks-modal-head .eyebrow {
+    display: none;
+  }
+  .ks-q-bottom > p {
+    display: none;
+  }
+  .ks-q-toolbar .ks-tabs button > svg,
+  .ks-q-export .btn > svg {
+    flex-shrink: 0;
+  }
+}
+@media (max-width: 650px) {
+  .ks-q-editor .input,
+  .ks-q-editor select,
+  .ks-editor-table td:first-child > input,
+  .ks-editor-table td:first-child > textarea,
+  .ks-editor-table td:nth-child(2) > input,
+  .ks-editor-table td:nth-child(3) > input {
+    font-size: 16px;
+  }
+  .ks-editor-table td:first-child > .ks-unit-input {
+    font-size: 16px;
+  }
+}

@@ -7,11 +7,16 @@ import {
   ArrowRight,
   Plus,
   Search,
-  Bell,
+  CalendarCheck2,
+  Phone,
+  DatabaseBackup,
+  BatteryCharging,
+  Share2,
   Users,
   Package,
   FileText,
   HeartHandshake,
+  House,
   Settings as SettingsIcon,
   Cloud,
   ChevronRight,
@@ -31,6 +36,10 @@ import {
   RefreshCw,
   ShieldCheck,
 } from "lucide-react";
+import Brand from "./components/Brand.jsx";
+import heroPhoto from "./assets/solar-residence.webp";
+import heroPhotoMobile from "./assets/solar-residence-mobile.webp";
+import { normalizeAssetPaths } from "./lib/assets.js";
 import { initialDb } from "./lib/seed.js";
 import { calculate, defaults } from "./lib/calculator.js";
 const Calculator = lazy(() => import("./views/Calculator.jsx")),
@@ -129,11 +138,11 @@ function loadDb() {
       ].every((k) => Array.isArray(p[k])) &&
       p.settings
     )
-      return {
+      return normalizeAssetPaths({
         ...structuredClone(initialDb),
         ...p,
         settings: { ...initialDb.settings, ...p.settings },
-      };
+      });
   } catch {}
   return structuredClone(initialDb);
 }
@@ -141,6 +150,13 @@ export default function App() {
   const [db, setDb] = useState(loadDb),
     [route, setRoute] = useState(location.hash.slice(1) || "overview"),
     [mobileMenu, setMobileMenu] = useState(false),
+    [isPhone, setIsPhone] = useState(
+      () => window.matchMedia("(max-width:780px)").matches,
+    ),
+    [mobileSearch, setMobileSearch] = useState(false),
+    [settingsTab, setSettingsTab] = useState("company"),
+    [customerFocus, setCustomerFocus] = useState(null),
+    [catalogQuery, setCatalogQuery] = useState(""),
     [toast, setToast] = useState(null),
     [query, setQuery] = useState(""),
     [share, setShare] = useState(null),
@@ -155,6 +171,46 @@ export default function App() {
     [planName, setPlanName] = useState(""),
     [tabChange, setTabChange] = useState(null);
   const notify = useCallback((message) => setToast(String(message)), []);
+  useEffect(() => {
+    if (mobileSearch)
+      requestAnimationFrame(() =>
+        document.querySelector(".global-search input")?.focus(),
+      );
+  }, [mobileSearch]);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width:780px)");
+    const listener = () => setIsPhone(mq.matches);
+    mq.addEventListener("change", listener);
+    return () => mq.removeEventListener("change", listener);
+  }, []);
+  useEffect(() => {
+    if (!mobileMenu) return;
+    const previous = document.activeElement,
+      overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const sidebar = document.querySelector(".sidebar");
+    sidebar?.querySelector("a,button")?.focus();
+    const onKey = (e) => {
+      if (e.key === "Escape") setMobileMenu(false);
+      if (e.key === "Tab") {
+        const nodes = [...(sidebar?.querySelectorAll("a,button") || [])];
+        if (e.shiftKey && document.activeElement === nodes[0]) {
+          e.preventDefault();
+          nodes.at(-1)?.focus();
+        } else if (!e.shiftKey && document.activeElement === nodes.at(-1)) {
+          e.preventDefault();
+          nodes[0]?.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = overflow;
+      document.removeEventListener("keydown", onKey);
+      previous?.focus?.();
+    };
+  }, [mobileMenu]);
+
   useEffect(() => {
     if (toast) {
       const id = setTimeout(() => setToast(null), 4400);
@@ -182,7 +238,7 @@ export default function App() {
     const f = (e) => {
       if (e.key === KEY && e.newValue)
         try {
-          setTabChange(JSON.parse(e.newValue));
+          setTabChange(normalizeAssetPaths(JSON.parse(e.newValue)));
         } catch {}
     };
     window.addEventListener("storage", f);
@@ -191,7 +247,9 @@ export default function App() {
   const updateDb = useCallback(
     (fn) =>
       setDb((prev) => {
-        const next = typeof fn === "function" ? fn(prev) : fn;
+        const next = normalizeAssetPaths(
+          typeof fn === "function" ? fn(prev) : fn,
+        );
         if (session?.role === "viewer") {
           notify("Tài khoản đám mây chỉ có quyền xem.");
           return prev;
@@ -221,6 +279,10 @@ export default function App() {
   const navigate = (key, payload) => {
     if (key === "calculator" && payload) setEditPlan(payload);
     if (key === "quotes" && payload) setIncomingQuote(payload);
+    if (key === "settings") setSettingsTab(payload?.tab || "company");
+    if (key === "customers") setCustomerFocus(payload?.customerId || null);
+    if (key === "catalog") setCatalogQuery(payload?.query || "");
+    setMobileSearch(false);
     location.hash = key;
     setRoute(key);
     setMobileMenu(false);
@@ -304,6 +366,7 @@ export default function App() {
           title: c.name,
           detail: "Khách hàng · " + (c.phone || ""),
           route: "customers",
+          payload: { customerId: c.id },
         }))
         .concat(
           db.plans
@@ -326,6 +389,7 @@ export default function App() {
               title: p.model || p.brand,
               detail: "Thiết bị · " + p.brand,
               route: "catalog",
+              payload: { query: p.model || p.brand },
             })),
         )
     : [];
@@ -349,22 +413,23 @@ export default function App() {
           onClick={() => setMobileMenu(false)}
         />
       )}
-      <aside className={"sidebar " + (mobileMenu ? "is-open" : "")}>
-        <a className="logo-lockup" href="#overview">
-          <span className="logo-symbol">
-            <Zap size={25} fill="currentColor" />
-          </span>
-          <span>
-            kimsolar<span className="logo-dot">.</span>
-            <small>SALES OPERATING SYSTEM</small>
-          </span>
+      <aside
+        className={"sidebar " + (mobileMenu ? "is-open" : "")}
+        inert={isPhone && !mobileMenu}
+        aria-hidden={isPhone && !mobileMenu}
+      >
+        <a
+          className="logo-lockup official-sidebar-logo"
+          href="#overview"
+          aria-label="Kim Solar - Tổng quan"
+        >
+          <Brand />
         </a>
         <div className="workspace-switch">
           <span className="workspace-mark">K</span>
           <div>
             Kim Solar Workspace<small>Kinh doanh & khách hàng</small>
           </div>
-          <ChevronRight size={15} />
         </div>
         <span className="nav-caption">KHÔNG GIAN LÀM VIỆC</span>
         <nav>
@@ -376,7 +441,9 @@ export default function App() {
                 onClick={() => navigate(key)}
                 aria-current={route === key ? "page" : undefined}
               >
-                <Icon size={18} />
+                <span className="nav-icon" aria-hidden="true">
+                  <Icon size={20} strokeWidth={1.8} />
+                </span>
                 <span>{title}</span>
                 {key === "quotes" && db.quotes.length > 0 && (
                   <em>{db.quotes.length}</em>
@@ -386,17 +453,15 @@ export default function App() {
           ))}
         </nav>
         <div className="sidebar-bottom">
-          <button className="cloud-card" onClick={() => setCloudOpen(true)}>
-            <Cloud size={20} />
+          <button
+            className="cloud-card backup-shortcut"
+            onClick={() => navigate("settings", { tab: "data" })}
+          >
+            <DatabaseBackup size={23} />
             <span>
-              {session ? "Đám mây đã kết nối" : "Dữ liệu trong tầm tay"}
-              <small>
-                {session
-                  ? session.userEmail
-                  : "Lưu trên máy · Sao lưu & đồng bộ"}
-              </small>
+              Sao lưu dữ liệu<small>Tải file và khôi phục hồ sơ</small>
             </span>
-            <ArrowUpRight size={15} />
+            <ArrowUpRight size={17} />
           </button>
           <a className="staff-block" href={"tel:" + db.settings.salesPhone}>
             <span className="staff-avatar">KD</span>
@@ -415,23 +480,58 @@ export default function App() {
               className="icon-btn mobile-menu"
               onClick={() => setMobileMenu(true)}
               aria-label="Mở menu"
+              aria-expanded={mobileMenu}
             >
               <Menu size={21} />
             </button>
+            <a
+              className="mobile-top-brand"
+              href="#overview"
+              aria-label="Kim Solar - Tổng quan"
+            >
+              <Brand />
+            </a>
             <span className="bread-root">Không gian làm việc</span>
             <ChevronRight size={13} />
             <strong>{activeRoute[2]}</strong>
           </div>
           <div className="topbar-actions">
-            <div className="global-search">
+            <button
+              className="icon-btn mobile-search-toggle"
+              aria-label="Mở tìm kiếm"
+              onClick={() => setMobileSearch((v) => !v)}
+            >
+              <Search size={21} />
+            </button>
+            <div
+              className={
+                "global-search " + (mobileSearch ? "is-mobile-open" : "")
+              }
+            >
               <Search size={16} />
               <input
                 aria-label="Tìm kiếm toàn bộ"
                 placeholder="Tìm khách, model, phương án..."
                 value={query}
+                autoFocus={mobileSearch}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") {
+                    setQuery("");
+                    setMobileSearch(false);
+                  }
+                }}
                 onChange={(e) => setQuery(e.target.value)}
               />
-              <kbd>⌕</kbd>
+              <button
+                className="mobile-search-close icon-btn"
+                aria-label="Đóng tìm kiếm"
+                onClick={() => {
+                  setMobileSearch(false);
+                  setQuery("");
+                }}
+              >
+                <X size={18} />
+              </button>
               {query && (
                 <div className="search-dropdown">
                   {matches.length ? (
@@ -456,7 +556,11 @@ export default function App() {
             </div>
             <button
               className={"connection-pill " + (saveError ? "error" : "")}
-              onClick={() => setCloudOpen(true)}
+              onClick={() =>
+                session
+                  ? setCloudOpen(true)
+                  : navigate("settings", { tab: "data" })
+              }
             >
               <span />
               {session ? "Cloud kết nối" : "Lưu trên máy"}
@@ -464,11 +568,27 @@ export default function App() {
             <button
               className="icon-btn"
               aria-label="Xem việc cần làm"
-              onClick={() => navigate("overview")}
+              onClick={() => {
+                navigate("overview");
+                setTimeout(
+                  () =>
+                    document
+                      .getElementById("today-tasks")
+                      ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+                  150,
+                );
+              }}
             >
-              <Bell size={19} />
+              <CalendarCheck2 size={21} />
             </button>
-            <span className="top-avatar">KD</span>
+            <a
+              className="quick-call"
+              href={"tel:" + db.settings.salesPhone}
+              aria-label={"Gọi " + db.settings.salesName}
+            >
+              <Phone size={18} />
+              <span>Liên hệ</span>
+            </a>
           </div>
         </header>
         <main className="page-content">
@@ -556,6 +676,7 @@ export default function App() {
             )}
             {route === "customers" && (
               <Customers
+                initialCustomerId={customerFocus}
                 db={db}
                 updateDb={updateDb}
                 notify={notify}
@@ -572,6 +693,7 @@ export default function App() {
             )}
             {route === "catalog" && (
               <Catalog
+                initialQuery={catalogQuery}
                 db={db}
                 updateDb={updateDb}
                 notify={notify}
@@ -582,28 +704,36 @@ export default function App() {
             {route === "settings" && (
               <>
                 <Settings
+                  initialTab={settingsTab}
+                  onTabChange={setSettingsTab}
                   db={db}
                   updateDb={updateDb}
                   notify={notify}
                   onNavigate={navigate}
                 />
-                <div className="card cloud-settings-callout">
-                  <Cloud size={28} />
-                  <div>
-                    <h3>Đồng bộ thực sự, khi bạn cần đội nhóm.</h3>
-                    <p>
-                      Kết nối Supabase để đăng nhập, phân quyền và đồng bộ có
-                      kiểm tra phiên bản. Dữ liệu hiện tại lưu trên máy.
-                    </p>
+                <details className="cloud-advanced-settings">
+                  <summary>
+                    <Cloud size={17} />
+                    Kết nối dữ liệu đội nhóm (tùy chọn)
+                  </summary>
+                  <div className="card cloud-settings-callout">
+                    <Cloud size={28} />
+                    <div>
+                      <h3>Kết nối không gian dữ liệu riêng của bạn</h3>
+                      <p>
+                        Kết nối Supabase để đăng nhập, phân quyền và đồng bộ có
+                        kiểm tra phiên bản. Dữ liệu hiện tại lưu trên máy.
+                      </p>
+                    </div>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => setCloudOpen(true)}
+                    >
+                      Thiết lập đám mây
+                      <ArrowUpRight size={15} />
+                    </button>
                   </div>
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => setCloudOpen(true)}
-                  >
-                    Thiết lập đám mây
-                    <ArrowUpRight size={15} />
-                  </button>
-                </div>
+                </details>
               </>
             )}
           </Suspense>
@@ -619,6 +749,34 @@ export default function App() {
           </footer>
         </main>
       </div>
+      <nav
+        className="mobile-quick-nav"
+        aria-label="Thao tác nhanh trên điện thoại"
+      >
+        {[
+          ["overview", LayoutDashboard, "Tổng quan"],
+          ["calculator", CalculatorIcon, "Tính toán"],
+          ["quotes", FileText, "Báo giá"],
+          ["customers", Users, "Khách hàng"],
+        ].map(([key, Icon, label]) => (
+          <button
+            key={key}
+            className={route === key ? "active" : ""}
+            onClick={() => navigate(key)}
+            aria-current={route === key ? "page" : undefined}
+          >
+            <Icon size={21} />
+            <span>{label}</span>
+          </button>
+        ))}
+        <button
+          onClick={() => setMobileMenu(true)}
+          aria-label="Mở toàn bộ chức năng"
+        >
+          <Menu size={21} />
+          <span>Thêm</span>
+        </button>
+      </nav>
       {toast && (
         <div className="toast" role="status">
           <Check size={17} />
@@ -697,7 +855,7 @@ export default function App() {
           <CloudSync
             db={db}
             replaceDb={(incoming) => {
-              const next = validateWorkspace(incoming);
+              const next = normalizeAssetPaths(validateWorkspace(incoming));
               try {
                 localStorage.setItem(KEY + ".before-cloud", JSON.stringify(db));
               } catch {}
@@ -720,76 +878,6 @@ export default function App() {
   );
 }
 
-function RoofArt() {
-  return (
-    <svg
-      className="roof-art"
-      viewBox="0 0 480 310"
-      aria-label="Mái nhà điện mặt trời"
-      role="img"
-    >
-      <defs>
-        <linearGradient id="panel" x2="1" y2="1">
-          <stop stopColor="#596872" />
-          <stop offset="1" stopColor="#24353e" />
-        </linearGradient>
-        <pattern id="grid" width="23" height="16" patternUnits="userSpaceOnUse">
-          <rect width="23" height="16" fill="url(#panel)" />
-          <path d="M0 0H23V16H0Z" stroke="#a0b7c0" strokeWidth=".65" />
-        </pattern>
-      </defs>
-      <ellipse
-        cx="242"
-        cy="264"
-        rx="185"
-        ry="29"
-        fill="#bfba9b"
-        opacity=".22"
-      />
-      <path d="m84 161 161 72v-88L84 84z" fill="#e2d7be" />
-      <path d="m245 145 153-70v86l-153 87z" fill="#c2b79b" />
-      <path
-        d="m57 91 191 82 181-104-189-62z"
-        stroke="#faf2dc"
-        strokeWidth="7"
-        fill="#d6c9a6"
-      />
-      <g transform="matrix(1 .37 -.83 .49 236 24)">
-        <rect
-          width="180"
-          height="160"
-          fill="url(#grid)"
-          stroke="#d0dada"
-          strokeWidth="3"
-        />
-        <path
-          d="M60 0V160M120 0V160M0 80H180"
-          stroke="#d3d9d6"
-          strokeWidth="3"
-        />
-      </g>
-      <path d="m130 152 42 18v46l-42-18z" fill="#7f8a79" />
-      <path
-        d="m282 163 28-16v37l-28 17zm47-26 28-16v37l-28 17z"
-        fill="#61756d"
-      />
-      <g stroke="#d5c9a8" strokeWidth="2">
-        <path d="m296 155v37m-14-10 28-16m33-37v37m-14-9 28-16" />
-      </g>
-      <circle cx="396" cy="24" r="22" fill="#f2a35e" />
-      <path
-        d="M396-7v-9m0 80v-9m31-31h10m-81 0h10m8-23-7-7m51 53 7 7m-7-53 7-7m-51 53-7 7"
-        stroke="#efaa68"
-        strokeWidth="2"
-      />
-      <path d="m53 226 19-42 19 42z" fill="#748b66" />
-      <path d="M73 211v38" stroke="#55634f" strokeWidth="3" />
-      <circle cx="426" cy="206" r="21" fill="#aab68b" />
-      <path d="M426 210v35" stroke="#667653" strokeWidth="3" />
-      <path d="m56 272 372-6" stroke="#bab69c" strokeDasharray="3 5" />
-    </svg>
-  );
-}
 function Dashboard({ db, updateDb, navigate, result, notify }) {
   const [task, setTask] = useState(""),
     [showTask, setShowTask] = useState(false);
@@ -832,7 +920,7 @@ function Dashboard({ db, updateDb, navigate, result, notify }) {
           <span className="eyebrow">KHỞI ĐẦU MỘT NGÀY NHIỀU CƠ HỘI</span>
           <h1>
             Chào bạn, cùng tạo năng lượng mới
-            <span className="heading-sun">✳</span>
+            <Sun className="heading-sun" size={25} strokeWidth={1.7} />
           </h1>
           <p>Mọi khách hàng, phương án và cuộc hẹn. Trong một không gian.</p>
         </div>
@@ -851,12 +939,12 @@ function Dashboard({ db, updateDb, navigate, result, notify }) {
         <div className="hero-copy">
           <span className="hero-label">
             <span />
-            KIM SOLAR · SALES WORKSPACE 2.0
+            KIM SOLAR · NĂNG LƯỢNG CHO TƯƠNG LAI
           </span>
           <h2>
-            Từ một mái nhà.
+            Khởi đầu từ mái nhà.
             <br />
-            Đến một <em>tương lai sáng.</em>
+            Lan tỏa <em>giá trị xanh.</em>
           </h2>
           <p>
             Biến nhu cầu của khách thành phương án rõ ràng.
@@ -887,16 +975,28 @@ function Dashboard({ db, updateDb, navigate, result, notify }) {
           </div>
         </div>
         <div className="hero-visual">
-          <div className="visual-orbit" />
-          <RoofArt />
-          <div className="floating-label">
-            <span className="floating-dot" />
+          <picture>
+            <source media="(max-width: 780px)" srcSet={heroPhotoMobile} />
+            <img
+              className="hero-photo"
+              src={heroPhoto}
+              width="1664"
+              height="941"
+              alt="Minh họa ngôi nhà hiện đại với hệ điện mặt trời trên mái"
+              fetchPriority="high"
+              decoding="async"
+            />
+          </picture>
+          <span className="hero-photo-caption">
+            Ảnh minh họa · Không gian sống cùng năng lượng sạch
+          </span>
+          <div className="energy-orbit">
+            <span className="energy-pulse" />
+            <Sun size={22} />
             <span>
-              Thiết kế từ nhu cầu
-              <small>Tiết kiệm là kết quả, không phải lời hứa.</small>
+              Năng lượng sạch<small>Giá trị bền vững</small>
             </span>
           </div>
-          <span className="visual-coordinate">10.8231° N · 106.6297° E</span>
         </div>
       </section>
       <section className="dashboard-metrics">
@@ -993,7 +1093,7 @@ function Dashboard({ db, updateDb, navigate, result, notify }) {
               Nhu cầu tiêu thụ
             </span>
             <small>
-              Phân bố đồ họa minh họa; giả định nắng {defaults.specificYield}{" "}
+              Giá trị tính theo giả định nắng {defaults.specificYield}{" "}
               kWh/kWp/ngày.
             </small>
           </div>
@@ -1005,7 +1105,7 @@ function Dashboard({ db, updateDb, navigate, result, notify }) {
             <ArrowUpRight size={16} />
           </button>
         </section>
-        <section className="card task-card">
+        <section id="today-tasks" className="card task-card">
           <div className="card-head">
             <div>
               <span className="eyebrow">ĐỪNG BỎ LỠ CƠ HỘI</span>
@@ -1169,37 +1269,40 @@ function Dashboard({ db, updateDb, navigate, result, notify }) {
   );
 }
 function EnergyChart({ result }) {
-  const g = result.dailyGeneration || 0,
-    l = (result.monthlyKwh || 0) / 30,
-    max = Math.max(g, l, 1);
+  const generation = result.dailyGeneration || 0,
+    load = (result.monthlyKwh || 0) / 30,
+    max = Math.max(generation, load, 1);
   return (
     <div
-      className="energy-chart"
+      className="energy-comparison"
       role="img"
-      aria-label="Biểu đồ phân bố minh họa dựa trên kịch bản mặc định"
+      aria-label={`Nhu cầu ${number(load)} và sản lượng dự kiến ${number(generation)} kWh mỗi ngày`}
     >
-      <div className="chart-y">
-        <span>{number(max)}</span>
-        <span>{number(max / 2)}</span>
-        <span>0</span>
-      </div>
-      <div className="chart-plot">
-        <div className="chart-gridlines">
-          <i />
-          <i />
-          <i />
+      {[
+        [Sun, "Sản lượng điện mặt trời", generation, "production"],
+        [Zap, "Nhu cầu tiêu thụ", load, "consumption"],
+      ].map(([Icon, label, value, type]) => (
+        <div className={"comparison-row " + type} key={type}>
+          <div className="comparison-label">
+            <span>
+              <Icon size={17} />
+              {label}
+            </span>
+            <strong>
+              {number(value)} <small>kWh/ngày</small>
+            </strong>
+          </div>
+          <div className="comparison-track">
+            <i style={{ width: (value / max) * 100 + "%" }} />
+          </div>
         </div>
-        {[0.72, 0.82, 0.9, 0.96, 1, 1, 0.95, 0.9, 0.84, 0.76, 0.7, 0.67].map(
-          (v, i) => (
-            <div className="chart-month" key={i}>
-              <div className="chart-bars">
-                <i style={{ height: Math.max(5, (l / max) * 100) + "%" }} />
-                <b style={{ height: Math.max(5, (g / max) * v * 100) + "%" }} />
-              </div>
-              <span>T{i + 1}</span>
-            </div>
-          ),
-        )}
+      ))}
+      <div className="comparison-insight">
+        <BatteryCharging size={20} />
+        <span>
+          Hệ lưu trữ {number(result.batteryKwh)} kWh
+          <small>Cân bằng tải ngày và đêm theo cấu hình tham khảo.</small>
+        </span>
       </div>
     </div>
   );
@@ -1493,7 +1596,24 @@ function Knowledge() {
           )
           .map(([tag, title, body], i) => (
             <article className="card knowledge-card" key={title}>
-              <span className="badge">{tag}</span>
+              <div className="knowledge-topic-heading">
+                <span className="knowledge-topic-icon">
+                  {React.createElement(
+                    [
+                      CalendarDays,
+                      BatteryCharging,
+                      ShieldCheck,
+                      House,
+                      Zap,
+                      FileText,
+                      HeartHandshake,
+                      Share2,
+                    ][articles.findIndex(([name]) => name === tag) % 8],
+                    { size: 23, strokeWidth: 1.7 },
+                  )}
+                </span>
+                <span className="badge">{tag}</span>
+              </div>
               <h2>{title}</h2>
               <p>{body}</p>
               <button
@@ -1539,11 +1659,8 @@ function GuestView({ envelope, error, onShare, share, setShare, notify }) {
   return (
     <div className="guest-wrap">
       <header className="guest-header">
-        <a className="logo-lockup" href={location.pathname}>
-          <span className="logo-symbol">
-            <Zap size={24} />
-          </span>
-          <span>kimsolar.</span>
+        <a className="logo-lockup official-guest-logo" href={location.pathname}>
+          <Brand />
         </a>
         <a className="btn btn-secondary" href={"tel:" + c.phone}>
           {c.phone}

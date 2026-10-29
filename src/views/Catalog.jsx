@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Plus,
   Search,
@@ -15,11 +15,63 @@ import {
   SlidersHorizontal,
   EyeOff,
   CheckCircle2,
+  Sun,
+  Zap,
+  BatteryCharging,
+  Cable,
+  Truck,
+  Wrench,
+  Layers3,
+  PlugZap,
 } from "lucide-react";
 import { categories } from "../lib/seed";
 import { RecordDialog } from "./Customers";
 import "./records.css";
 
+const categoryIcons = {
+  panel: Sun,
+  inv: Zap,
+  bat: BatteryCharging,
+  cab: ShieldCheck,
+  rail: Layers3,
+  kbia: Layers3,
+  kgiua: Layers3,
+  mc4: PlugZap,
+  wr: Cable,
+  wb: Cable,
+  truck: Truck,
+  misc: Wrench,
+  labor: Wrench,
+};
+function CategoryGlyph({ category, size = 15 }) {
+  const Icon = categoryIcons[category] || Package;
+  return <Icon size={size} strokeWidth={1.8} />;
+}
+function ProductVisual({ product }) {
+  const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [product.image]);
+  const Icon = categoryIcons[product.category] || Package;
+  return product.image && !failed ? (
+    <img
+      src={product.image}
+      alt={
+        product.brand +
+        " " +
+        (product.model || categories[product.category] || "thiết bị")
+      }
+      loading="lazy"
+      onError={() => setFailed(true)}
+    />
+  ) : (
+    <div className={"record-productplaceholder category-" + product.category}>
+      <span>
+        <Icon size={48} strokeWidth={1.55} />
+      </span>
+      <small>{categories[product.category] || "Thiết bị"}</small>
+      <em>Chưa có ảnh sản phẩm</em>
+    </div>
+  );
+}
 const uid = () => crypto.randomUUID(),
   money = (n) => Number(n || 0).toLocaleString("vi-VN") + " đ";
 const blank = () => ({
@@ -88,13 +140,23 @@ function downloadCsv(products) {
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
-export default function Catalog({ db, updateDb, notify, onNavigate }) {
-  const [search, setSearch] = useState(""),
+export default function Catalog({
+  db,
+  updateDb,
+  notify,
+  onNavigate,
+  initialQuery = "",
+}) {
+  const [search, setSearch] = useState(initialQuery),
     [category, setCategory] = useState("all"),
-    [status, setStatus] = useState("all"),
+    [status, setStatus] = useState("active"),
     [layout, setLayout] = useState("grid"),
     [draft, setDraft] = useState(null),
     [error, setError] = useState("");
+  useEffect(() => {
+    setSearch(String(initialQuery || ""));
+    if (initialQuery) setStatus("all");
+  }, [initialQuery]);
   const products = db.products || [],
     filtered = products.filter(
       (p) =>
@@ -327,6 +389,7 @@ export default function Catalog({ db, updateDb, notify, onNavigate }) {
           className={category === "all" ? "active" : ""}
           onClick={() => setCategory("all")}
         >
+          <LayoutGrid size={15} />
           Tất cả <span>{products.length}</span>
         </button>
         {Object.entries(categories).map(([k, v]) => (
@@ -335,6 +398,7 @@ export default function Catalog({ db, updateDb, notify, onNavigate }) {
             className={category === k ? "active" : ""}
             onClick={() => setCategory(k)}
           >
+            <CategoryGlyph category={k} />
             {v} <span>{products.filter((p) => p.category === k).length}</span>
           </button>
         ))}
@@ -392,16 +456,7 @@ export default function Catalog({ db, updateDb, notify, onNavigate }) {
                     <span className="record-productcategory">
                       {categories[p.category] || p.category}
                     </span>
-                    {p.image ? (
-                      <img
-                        src={p.image}
-                        alt={p.brand + " " + p.model}
-                        loading="lazy"
-                        onError={(e) => (e.currentTarget.style.opacity = ".1")}
-                      />
-                    ) : (
-                      <Package size={66} strokeWidth={0.8} />
-                    )}
+                    <ProductVisual product={p} />
                     <button
                       className="record-icon"
                       onClick={() => {

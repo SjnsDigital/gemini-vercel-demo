@@ -16,9 +16,13 @@ import {
   Clock,
   ChevronRight,
   LoaderCircle,
+  SquarePen,
+  Eye,
+  Save,
 } from "lucide-react";
 import { downloadBlob } from "../lib/share.js";
 import "./quotes.css";
+import Brand from "../components/Brand.jsx";
 
 const money = (n) => Math.round(Number(n) || 0).toLocaleString("vi-VN") + " đ";
 const number = (n) => (Number.isFinite(Number(n)) ? Number(n) : 0);
@@ -380,12 +384,14 @@ function Editor({
             className={tab === "edit" ? "selected" : ""}
             onClick={() => setTab("edit")}
           >
+            <SquarePen size={16} />
             Thông tin & hạng mục
           </button>
           <button
             className={tab === "preview" ? "selected" : ""}
             onClick={() => setTab("preview")}
           >
+            <Eye size={16} />
             Xem bản A4
           </button>
         </div>
@@ -496,7 +502,7 @@ function Editor({
                   <tbody>
                     {draft.rows.map((r, i) => (
                       <tr key={r.id + "-" + i}>
-                        <td>
+                        <td data-label={`Hạng mục ${i + 1}`}>
                           <input
                             aria-label={`Tên hạng mục ${i + 1}`}
                             value={r.name}
@@ -524,7 +530,7 @@ function Editor({
                             disabled={readOnly}
                           />
                         </td>
-                        <td>
+                        <td data-label="Số lượng">
                           <input
                             type="number"
                             min="0"
@@ -544,7 +550,7 @@ function Editor({
                             disabled={readOnly}
                           />
                         </td>
-                        <td>
+                        <td data-label="Đơn giá (đ)">
                           <input
                             type="number"
                             min="0"
@@ -563,10 +569,10 @@ function Editor({
                             disabled={readOnly}
                           />
                         </td>
-                        <td className="ks-nowrap">
+                        <td className="ks-nowrap" data-label="Thành tiền">
                           {money(number(r.qty) * number(r.price))}
                         </td>
-                        <td>
+                        <td data-label="Xác minh đơn giá">
                           <label className="ks-price-check">
                             <input
                               type="checkbox"
@@ -783,7 +789,7 @@ function Editor({
             <header className="ks-q-company">
               <div>
                 <div className="ks-q-logo">
-                  ☼ <b>kimsolar</b>
+                  <Brand className="quote-brand" />
                 </div>
                 <strong>{company}</strong>
                 <p>
@@ -983,6 +989,7 @@ function Editor({
                 className="btn btn-secondary"
                 onClick={() => onSave(draft, "draft")}
               >
+                <Save size={16} />
                 Lưu bản nháp
               </button>
               <button

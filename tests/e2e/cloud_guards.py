@@ -15,7 +15,7 @@ with sync_playwright() as p:
   else:body={}
   route.fulfill(status=200,content_type='application/json',body=json.dumps(body),headers={'access-control-allow-origin':'*'})
  page.route('https://*.supabase.co/**',mock)
- page.goto(os.environ.get('KIMSOLAR_TEST_URL','http://127.0.0.1:5173').rstrip('/')+'/');page.get_by_role('button',name='Dữ liệu trong tầm tay',exact=False).click()
+ page.goto(os.environ.get('KIMSOLAR_TEST_URL','http://127.0.0.1:5173').rstrip('/')+'/');page.goto(os.environ.get('KIMSOLAR_TEST_URL','http://127.0.0.1:5173').rstrip('/')+'/#settings');page.get_by_text('Kết nối dữ liệu đội nhóm (tùy chọn)',exact=True).click();page.get_by_role('button',name='Thiết lập đám mây',exact=True).click()
  expect(page.get_by_text('Cấu hình dự án đã thay đổi.',exact=False)).to_be_visible()
  assert requests==[],requests
  assert page.evaluate('sessionStorage.getItem("kimsolar.cloud.session.v1")') is None

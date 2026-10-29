@@ -1160,3 +1160,519 @@
     animation: none;
   }
 }
+
+/* Clear, semantic visual states and comfortable controls on real devices. */
+.record-statrow span {
+  gap: 7px;
+  line-height: 1.6;
+  color: #65705e;
+}
+.record-statrow span svg {
+  color: #55799a;
+  stroke-width: 1.8;
+  flex: none;
+}
+.record-page .record-rowactions {
+  white-space: nowrap;
+}
+.record-quickcall {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #176a49;
+  border-radius: 8px;
+  padding: 9px 11px;
+  background: #eff8f3;
+  margin-right: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  min-height: 40px;
+}
+.record-quickcall:hover {
+  background: #e1f2e9;
+}
+.record-quickcall svg {
+  stroke-width: 1.8;
+}
+.record-detail {
+  scroll-margin-top: 85px;
+  outline: none;
+}
+.record-ticketcustomer > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.record-ticketcustomer > span svg {
+  color: #7c8e73;
+  flex: none;
+}
+.record-ticketcontact {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 12px 0;
+}
+.record-ticketcontact a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 11px;
+  min-height: 40px;
+  border: 1px solid #dce7da;
+  border-radius: 8px;
+  color: #39704d;
+  background: #f6faf3;
+  font-size: 11px;
+  font-weight: 550;
+}
+.record-ticketcontact a:hover {
+  background: #eaf4e7;
+  border-color: #bed1b9;
+}
+.record-productplaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #59799b;
+  gap: 8px;
+  text-align: center;
+  position: relative;
+  padding: 18px;
+}
+.record-productplaceholder > span {
+  height: 82px;
+  width: 82px;
+  display: grid;
+  place-items: center;
+  border-radius: 22px;
+  background: linear-gradient(145deg, #fff, #e7f0f9);
+  border: 1px solid #dae5ef;
+  box-shadow: 0 8px 25px #3a6c9c0c;
+  transform: rotate(-4deg);
+}
+.record-productplaceholder > span svg {
+  transform: rotate(4deg);
+}
+.record-productplaceholder small {
+  font-size: 11px;
+  font-weight: 650;
+  color: #61768a;
+  line-height: 1.4;
+}
+.record-productplaceholder em {
+  font-style: normal;
+  font-size: 9px;
+  color: #8796a3;
+}
+.record-productplaceholder.category-panel {
+  color: #dc8d26;
+}
+.record-productplaceholder.category-bat {
+  color: #3a8667;
+}
+.record-productplaceholder.category-inv {
+  color: #307cbc;
+}
+.record-productvisual > .record-icon {
+  background: #ffffffde;
+  border: 1px solid #e0e8dc;
+  box-shadow: 0 2px 5px #1c3c1407;
+}
+.record-productbody h3 {
+  font-size: 15px;
+  line-height: 1.65;
+}
+.record-productbody > p {
+  font-size: 11px;
+  color: #78836d;
+  line-height: 1.7;
+}
+.record-productbrand {
+  font-size: 10px;
+  letter-spacing: 1.2px;
+}
+.record-page .record-dialogbody .field > span {
+  color: #55644b;
+  line-height: 1.6;
+}
+.record-page button:focus-visible,
+.record-overlay button:focus-visible,
+.record-overlay a:focus-visible {
+  outline: 3px solid #e99854;
+  outline-offset: 3px;
+}
+
+@media (max-width: 650px) {
+  .record-page .page-heading h1 {
+    font-size: 25px;
+    line-height: 1.4;
+  }
+  .record-page .page-heading p {
+    font-size: 12px;
+    line-height: 1.8;
+    color: #77846b;
+  }
+  .record-page .record-statrow span {
+    font-size: 11px;
+  }
+  .record-statrow > div {
+    padding: 18px 15px;
+  }
+  .record-statrow strong {
+    font-size: 30px;
+  }
+  .record-search input,
+  .record-page .select,
+  .record-dialog .input,
+  .record-dialog .select,
+  .record-dialog textarea {
+    font-size: 16px;
+    min-height: 46px;
+  }
+  .record-search {
+    min-height: 46px;
+  }
+  .record-dialog .field > span {
+    font-size: 12px;
+    line-height: 1.55;
+  }
+  .record-page .btn,
+  .record-dialog .btn,
+  .record-dialog .record-upload,
+  .record-page .record-upload {
+    min-height: 44px;
+    font-size: 12px;
+  }
+  .record-icon,
+  .record-productvisual > .record-icon,
+  .record-dialog .record-icon {
+    min-width: 44px;
+    width: 44px;
+    height: 44px;
+  }
+  .record-actions {
+    gap: 9px;
+  }
+  .record-detail .record-actions .btn {
+    flex: 1;
+    min-width: 95px;
+  }
+  .record-detail h2 {
+    font-size: 22px;
+  }
+  .record-contact p {
+    font-size: 12px;
+    line-height: 1.75;
+  }
+  .record-detailnote {
+    font-size: 12px;
+    line-height: 1.85;
+  }
+  .record-timeline h3 {
+    font-size: 14px;
+  }
+  .record-timeline article p {
+    font-size: 12px;
+    line-height: 1.75;
+  }
+  .record-timeline article small {
+    font-size: 10px;
+  }
+  .record-empty p {
+    font-size: 12px;
+    color: #78876a;
+  }
+  .record-empty h3 {
+    font-size: 20px;
+    line-height: 1.45;
+  }
+  .record-productgrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    padding: 16px;
+  }
+  .record-productvisual {
+    height: 200px;
+  }
+  .record-productvisual > img {
+    height: 155px;
+    max-width: 85%;
+    width: auto;
+    object-fit: contain;
+  }
+  .record-productvisual > .record-icon {
+    top: 12px;
+    right: 12px;
+  }
+  .record-productcategory {
+    font-size: 10px;
+    max-width: calc(100% - 85px);
+    line-height: 1.5;
+    padding: 6px 8px;
+  }
+  .record-productbody {
+    padding: 18px;
+  }
+  .record-productbrand {
+    font-size: 10px;
+  }
+  .record-productbody h3 {
+    font-size: 16px;
+    min-height: 0;
+    margin: 10px 0;
+    line-height: 1.65;
+  }
+  .record-productbody > p {
+    font-size: 12px;
+    min-height: 0;
+  }
+  .record-productbottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 9px;
+  }
+  .record-productbottom strong {
+    font-size: 16px;
+  }
+  .record-productbottom .badge {
+    font-size: 10px;
+    max-width: 55%;
+    white-space: normal;
+  }
+  .record-productedit {
+    font-size: 12px;
+    min-height: 46px;
+    padding: 12px 0;
+  }
+  .record-productedit svg {
+    width: 16px;
+    height: 16px;
+  }
+  .record-ticket {
+    padding: 19px;
+  }
+  .record-tickettitle {
+    font-size: 17px;
+    line-height: 1.55;
+    min-height: 44px;
+  }
+  .record-tickettype {
+    font-size: 11px;
+  }
+  .record-ticket > p {
+    font-size: 12px;
+    line-height: 1.85;
+  }
+  .record-ticketcustomer {
+    font-size: 13px;
+  }
+  .record-ticketcustomer small {
+    font-size: 11px;
+  }
+  .record-ticketfoot {
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .record-ticketfoot .select {
+    width: 100%;
+    max-width: none;
+    font-size: 15px;
+    min-height: 46px;
+  }
+  .record-ticketfoot > span {
+    font-size: 11px;
+    min-height: 22px;
+  }
+  .record-ticketcontact {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .record-ticketcontact a {
+    min-height: 44px;
+    justify-content: center;
+    font-size: 12px;
+  }
+  .record-surveygroup summary {
+    font-size: 13px;
+    min-height: 48px;
+    line-height: 1.6;
+  }
+  .record-surveygroup .field {
+    gap: 8px;
+  }
+  .record-checkboxrow {
+    font-size: 12px;
+    line-height: 1.8;
+    min-height: 44px;
+    align-items: center;
+  }
+  .record-checkboxrow input {
+    width: 20px;
+    height: 20px;
+    flex: none;
+  }
+  .record-dialog > header {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 2;
+    border-bottom: 1px solid #e5eadf;
+    padding: 16px 18px;
+  }
+  .record-dialog footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    background: #fff;
+    border-top: 1px solid #e3e9da;
+    padding: 13px 17px;
+  }
+  .record-dialog footer .btn {
+    flex: 1;
+  }
+  .record-dialogbody {
+    padding: 20px 18px;
+  }
+  .record-catalogfoot {
+    font-size: 11px;
+    line-height: 1.8;
+  }
+  .record-catalogfoot > button {
+    min-height: 44px;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+  }
+  /* Client cards avoid sideways table scrolling for the most common mobile job. */
+  .customer-page .record-list .data-table {
+    display: block;
+    min-width: 0;
+    width: 100%;
+  }
+  .customer-page .record-list .data-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .customer-page .record-list .data-table tbody {
+    display: grid;
+    width: 100%;
+  }
+  .customer-page .record-list .data-table tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 13px 15px;
+    padding: 18px;
+    border-bottom: 1px solid #e5eadf;
+  }
+  .customer-page .record-list .data-table td {
+    display: block;
+    border: 0;
+    padding: 0;
+    min-width: 0;
+    font-size: 12px;
+  }
+  .customer-page .record-list .data-table td:first-child {
+    grid-column: 1/-1;
+  }
+  .customer-page .record-list .data-table td[data-label]:before {
+    content: attr(data-label);
+    display: block;
+    color: #829070;
+    font-size: 10px;
+    margin-bottom: 6px;
+  }
+  .customer-page .record-list .data-table td.record-rowactions {
+    grid-column: 1/-1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px solid #eef1e9;
+    padding-top: 12px;
+  }
+  .customer-page .record-name {
+    min-height: 48px;
+    width: 100%;
+  }
+  .customer-page .record-name b {
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  .customer-page .record-name small {
+    font-size: 11px;
+    line-height: 1.7;
+    margin-top: 4px;
+  }
+  .customer-page .record-avatar {
+    height: 43px;
+    width: 43px;
+    font-size: 12px;
+  }
+  .customer-page .record-quickcall {
+    min-height: 44px;
+    margin-right: 0;
+    padding: 9px 14px;
+    font-size: 12px;
+  }
+  .customer-page .record-rowactions > .record-icon {
+    border: 1px solid #e0e7d8;
+    background: #fafcf7;
+  }
+  .record-textdanger {
+    min-height: 44px;
+    font-size: 11px;
+    padding: 10px 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .record-productvisual > .record-icon:hover {
+    transform: translate(1px, -1px);
+    transition: transform 0.18s ease;
+  }
+}
+
+.record-categorystrip button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 42px;
+}
+.record-categorystrip button > svg {
+  flex: none;
+}
+@media (max-width: 650px) {
+  .record-categorystrip button {
+    font-size: 12px;
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+  .record-categorystrip {
+    padding-bottom: 8px;
+    gap: 8px;
+  }
+  .record-categorystrip button > span {
+    font-size: 10px;
+  }
+}
+
+.record-name > span:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.record-detail h2,
+.record-tickettitle,
+.record-productbody h3 {
+  overflow-wrap: anywhere;
+}
+.record-ticketcontact a > svg {
+  flex: none;
+}

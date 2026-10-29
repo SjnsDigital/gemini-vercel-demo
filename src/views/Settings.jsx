@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Building2,
   Database,
@@ -327,8 +327,19 @@ export function productsCsv(products) {
   );
 }
 
-export default function Settings({ db, updateDb, notify = () => {} }) {
-  const [tab, setTab] = useState("company");
+export default function Settings({
+  db,
+  updateDb,
+  notify = () => {},
+  initialTab = "company",
+  onTabChange = () => {},
+}) {
+  const validTab = (value) =>
+    ["company", "pricing", "data"].includes(value) ? value : "company";
+  const [tab, setTab] = useState(() => validTab(initialTab));
+  useEffect(() => {
+    setTab(validTab(initialTab));
+  }, [initialTab]);
   const [form, setForm] = useState(() => ({ ...db.settings }));
   const [pending, setPending] = useState(null);
   const [error, setError] = useState("");
@@ -585,6 +596,7 @@ export default function Settings({ db, updateDb, notify = () => {} }) {
               aria-current={tab === id ? "page" : undefined}
               onClick={() => {
                 setTab(id);
+                onTabChange(id);
                 setError("");
               }}
             >

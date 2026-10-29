@@ -1,3 +1,4 @@
+import { publicAsset } from "./assets.js";
 export const categories = {
   panel: "Tấm pin",
   inv: "Biến tần",
@@ -14,7 +15,7 @@ export const categories = {
   labor: "Nhân công",
 };
 
-export const seedProducts = [
+const sourceProducts = [
   {
     id: "source-panel-1",
     category: "panel",
@@ -679,6 +680,11 @@ export const seedProducts = [
     purchasePrice: 0,
   },
 ];
+
+export const seedProducts = sourceProducts.map((product) => ({
+  ...product,
+  image: publicAsset(product.image),
+}));
 
 export const defaultSettings = {
   companyName: "CÔNG TY TNHH NĂNG LƯỢNG KIM SOLAR",

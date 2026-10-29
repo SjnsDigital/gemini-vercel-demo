@@ -1818,3 +1818,152 @@
 .calc-checks .badge {
   color: #6e785f;
 }
+
+/* Mobile-first consulting controls: legible labels, actual thumb-sized targets. */
+.calc-mobile-jump {
+  display: none !important;
+}
+.calc-results {
+  scroll-margin-top: 90px;
+}
+@media (max-width: 780px) {
+  .calc-mobile-jump {
+    display: inline-flex !important;
+  }
+  .calc-heading-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  .calc-heading-actions .btn {
+    min-height: 44px;
+    font-size: 11px;
+    flex: 1;
+    padding: 10px 8px;
+  }
+  .calc-section summary {
+    min-height: 50px;
+    font-size: 13px;
+  }
+  .calculator-workspace .segmented button,
+  .calc-bill-presets button {
+    min-height: 44px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .calc-field > span {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .calc-field .input,
+  .calc-field .select {
+    font-size: 16px;
+    min-height: 46px;
+  }
+  .calc-field small,
+  .calc-form-header p,
+  .calc-tiny-note,
+  .calc-form-note p,
+  .calc-range-labels {
+    font-size: 11px;
+    line-height: 1.8;
+  }
+  .calc-checkbox {
+    font-size: 12px;
+    min-height: 44px;
+    line-height: 1.7;
+    gap: 10px;
+    align-items: center;
+  }
+  .calc-checkbox input {
+    width: 19px;
+    height: 19px;
+    flex: none;
+  }
+  .calc-section-body input[type="range"] {
+    height: 32px;
+  }
+  .calc-result-tabs button {
+    min-height: 46px;
+    font-size: 11px;
+    padding: 10px 8px;
+  }
+  .calc-check-item p {
+    font-size: 12px;
+    line-height: 1.8;
+  }
+  .calc-check-item svg {
+    width: 17px;
+    height: 17px;
+    flex: none;
+  }
+  .calc-backup-info,
+  .calc-energy-chart > p {
+    font-size: 11px;
+    line-height: 1.8;
+  }
+  .calc-roof-foot,
+  .calc-roof-legend,
+  .energy-chart-legend {
+    font-size: 10px;
+    line-height: 1.7;
+  }
+  .energy-chart-row > div:first-child,
+  .energy-chart-row strong small {
+    font-size: 11px;
+  }
+  .calc-equipment-metrics small,
+  .calc-equipment-metrics div > span:not(.eq-metric-icon) {
+    font-size: 11px;
+  }
+  .calc-action-panel p {
+    font-size: 11px;
+    line-height: 1.8;
+  }
+  .calc-action-buttons .btn {
+    font-size: 12px;
+    min-height: 48px;
+    flex: 1;
+  }
+  .calc-bottom-disclaimer {
+    font-size: 10px;
+    line-height: 1.8;
+  }
+  .calc-materials-table {
+    font-size: 12px;
+  }
+  .calc-materials-table td small {
+    font-size: 10px;
+  }
+  .calc-hero-bottom > button {
+    min-height: 44px;
+    font-size: 11px;
+  }
+  .comparison-row,
+  .comparison-row > strong {
+    font-size: 11px;
+    line-height: 1.7;
+  }
+}
+@media (max-width: 390px) {
+  .calc-heading-actions .btn {
+    font-size: 10px;
+    gap: 6px;
+  }
+  .calc-heading-actions .btn > svg {
+    width: 14px;
+    height: 14px;
+  }
+  .calc-result-tabs button {
+    font-size: 10px;
+    padding: 10px 5px;
+  }
+  .calc-action-buttons {
+    gap: 8px;
+  }
+  .calc-action-buttons .btn {
+    font-size: 11px;
+    padding: 10px 8px;
+  }
+}

@@ -1,3 +1,5 @@
+const officialLogoURL = new URL("../assets/brand-logo.png", import.meta.url)
+  .href;
 const MAX_TOKEN = 180000;
 const MAX_BYTES = 250000;
 const INPUT_FIELDS = [
@@ -159,34 +161,30 @@ export function publicPlan(plan) {
     input: pick(plan?.input || result.input || {}, INPUT_FIELDS),
     result: {
       ...pick(result, RESULT_FIELDS),
-      warnings: (result.warnings || [])
-        .slice(0, 30)
-        .map((w) =>
-          typeof w === "string"
-            ? { level: "warning", message: bounded(w) }
-            : {
-                code: bounded(w.code, 80),
-                level: ["info", "warning", "error"].includes(w.level)
-                  ? w.level
-                  : "warning",
-                message: bounded(w.message || w.text),
-              },
-        ),
+      warnings: (result.warnings || []).slice(0, 30).map((w) =>
+        typeof w === "string"
+          ? { level: "warning", message: bounded(w) }
+          : {
+              code: bounded(w.code, 80),
+              level: ["info", "warning", "error"].includes(w.level)
+                ? w.level
+                : "warning",
+              message: bounded(w.message || w.text),
+            },
+      ),
       assumptions: (result.assumptions || [])
         .slice(0, 3)
         .map((x) => bounded(x)),
-      rows: (result.rows || [])
-        .slice(0, 40)
-        .map((r) => ({
-          id: bounded(r.id, 80),
-          name: bounded(r.name, 200),
-          model: bounded(r.model, 1000),
-          unit: bounded(r.unit, 30),
-          qty: Number(r.qty) || 0,
-          price: Number(r.price) || 0,
-          verified: !!r.verified,
-          warranty: bounded(r.warranty, 1000),
-        })),
+      rows: (result.rows || []).slice(0, 40).map((r) => ({
+        id: bounded(r.id, 80),
+        name: bounded(r.name, 200),
+        model: bounded(r.model, 1000),
+        unit: bounded(r.unit, 30),
+        qty: Number(r.qty) || 0,
+        price: Number(r.price) || 0,
+        verified: !!r.verified,
+        warranty: bounded(r.warranty, 1000),
+      })),
     },
   };
 }
@@ -355,25 +353,19 @@ export async function renderSummaryImage(plan, settings = {}) {
   ctx.fillStyle = "#f5f3ee";
   ctx.fillRect(0, 0, 1080, 1440);
   rounded(ctx, 40, 40, 1000, 1360, 32, "#ffffff");
-  rounded(ctx, 40, 40, 1000, 480, 32, "#142d32");
+  rounded(ctx, 40, 40, 1000, 480, 32, "#143554");
   ctx.fillRect(40, 450, 1000, 70);
-  ctx.strokeStyle = "#cf8650";
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.arc(110, 111, 24, 0, Math.PI * 2);
-  ctx.stroke();
-  for (let a = 0; a < 8; a++) {
-    const rad = (a * Math.PI) / 4;
-    ctx.beginPath();
-    ctx.moveTo(110 + Math.cos(rad) * 34, 111 + Math.sin(rad) * 34);
-    ctx.lineTo(110 + Math.cos(rad) * 43, 111 + Math.sin(rad) * 43);
-    ctx.stroke();
-  }
-  ctx.fillStyle = "white";
-  ctx.font = "700 42px system-ui";
-  ctx.fillText("kimsolar", 172, 125);
+  const logo = await new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () =>
+      reject(new Error("Không tải được logo Kim Solar. Vui lòng thử lại."));
+    img.src = officialLogoURL;
+  });
+  rounded(ctx, 66, 65, 335, 130, 17, "#ffffff");
+  ctx.drawImage(logo, 80, 72, 307, (307 * 278) / 720);
   ctx.font = "500 18px system-ui";
-  ctx.fillStyle = "#a8c1bc";
+  ctx.fillStyle = "#b8d6ed";
   ctx.fillText("GIẢI PHÁP ĐIỆN MẶT TRỜI", 75, 207);
   ctx.font = "700 76px system-ui";
   ctx.fillStyle = "white";
@@ -383,7 +375,7 @@ export async function renderSummaryImage(plan, settings = {}) {
     308,
   );
   ctx.font = "400 27px system-ui";
-  ctx.fillStyle = "#c7d8d1";
+  ctx.fillStyle = "#c3daed";
   ctx.fillText(
     `${r.panelCount || 0} tấm pin · Biến tần ${r.inverterKw || r.recommendedInverterKw || 0} kW`,
     75,

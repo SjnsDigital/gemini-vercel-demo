@@ -1,4 +1,6 @@
-# Kim Solar Workspace 2.0
+# Kim Solar Workspace 2.1
+
+Bản công khai: **https://sjnsdigital.github.io/gemini-vercel-demo/** — GitHub Pages, không cần đăng nhập Vercel.
 
 Ứng dụng React 19 / Vite hỗ trợ kinh doanh và CSKH điện mặt trời. Giao diện mới hoàn toàn, font Be Vietnam Pro được lưu cùng ứng dụng; không phụ thuộc CDN. Liên hệ mặc định **0987000783 — Nhân Viên Kinh Doanh**.
 
@@ -55,3 +57,13 @@ PDF báo giá được dựng từ cùng nội dung xem trước, chia trang A4 
 ## Cấu trúc
 
 `src/App.jsx` và `styles.css`: khung ứng dụng, dashboard, tra nhanh, thư viện, màn khách; `src/views/`: các nghiệp vụ; `src/lib/calculator.js`: bộ tính thuần; `src/lib/share.js`: ảnh/link; `src/lib/seed.js`: dữ liệu ban đầu; `src/components/CloudSync.jsx`: tích hợp Supabase; `public/assets/products/`: ảnh tự lưu; `supabase/`: schema và hướng dẫn backend.
+
+## Bản 2.1 — hình ảnh, nhận diện và thao tác mobile
+
+Logo Kim Solar chính thức từ tài liệu nguồn được giữ đúng tỷ lệ, dùng ở menu, header điện thoại, màn khách, PDF và ảnh chia sẻ. Hình nhà SVG cũ đã được bỏ; ảnh minh họa mới được xuất WebP và có bản 720 px riêng cho điện thoại (khoảng66 KB). Ảnh là minh họa, không tuyên bố công trình đã thi công.
+
+Thanh điều hướng mobile có Tổng quan/Tính toán/Báo giá/Khách hàng/Thêm. Menu ẩn không giữ focus bàn phím; có tìm kiếm mobile, truy cập đúng hồ sơ/model từ kết quả tìm, sao lưu mở thẳng trang dữ liệu. Các menu/nghiệp vụ vẫn dùng được không cần đăng nhập. Kết nối Supabase là tùy chọn nâng cao trong cài đặt; không phải điều kiện mở website.
+
+Bản build Pages: `npm run build:pages`. Xuất bản nguyên thư mục `dist-pages` lên nhánh `gh-pages`; cần `.nojekyll`. Dữ liệu và đường dẫn ảnh đã hỗ trợ prefix `/gemini-vercel-demo/`, kể cả ảnh trong bản sao lưu cũ. Nhánh `main` và website Vercel cũ không bị thay đổi bởi luồng phát hành Pages.
+
+Bản public không có hồ sơ khách thật được cài sẵn. Dữ liệu nhập trên một trình duyệt vẫn là dữ liệu riêng của trình duyệt đó; không tự công khai lên GitHub Pages.

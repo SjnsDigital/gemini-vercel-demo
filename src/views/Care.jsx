@@ -10,6 +10,9 @@ import {
   Trash2,
   ShieldCheck,
   CalendarDays,
+  Phone,
+  MessageSquare,
+  UserRound,
 } from "lucide-react";
 import { RecordDialog } from "./Customers";
 import "./records.css";
@@ -273,9 +276,37 @@ export default function Care({ db, updateDb, notify }) {
                 </button>
                 <p>{t.description || "Chưa bổ sung mô tả."}</p>
                 <div className="record-ticketcustomer">
-                  {customer(t.customerId)?.name || "Khách chưa liên kết"}
+                  <span>
+                    <UserRound size={14} />
+                    {customer(t.customerId)?.name || "Khách chưa liên kết"}
+                  </span>
                   <small>{t.assignedTo || "Chưa phân công"}</small>
                 </div>
+                {customer(t.customerId)?.phone && (
+                  <div className="record-ticketcontact">
+                    <a
+                      href={
+                        "tel:" +
+                        customer(t.customerId).phone.replace(/[^+\d]/g, "")
+                      }
+                    >
+                      <Phone size={15} />
+                      Gọi khách
+                    </a>
+                    <a
+                      href={
+                        "https://zalo.me/" +
+                        customer(t.customerId).phone.replace(/\D/g, "")
+                      }
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <MessageSquare size={15} />
+                      Nhắn Zalo
+                      <ArrowUpRight size={13} />
+                    </a>
+                  </div>
+                )}
                 <div className="record-ticketfoot">
                   <select
                     aria-label={"Trạng thái " + t.title}

@@ -1,13 +1,14 @@
 {
   "name": "kimsolar-workspace",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "node --test src/lib/*.test.js"
+    "test": "node --test src/lib/*.test.js",
+    "build:pages": "vite build --base=/gemini-vercel-demo/ --outDir dist-pages"
   },
   "dependencies": {
     "@fontsource/be-vietnam-pro": "^5.3.0",

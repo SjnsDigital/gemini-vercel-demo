@@ -466,3 +466,190 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* Clear settings controls and safer thumb targets on compact screens. */
+.settings-nav > button {
+  min-height: 60px;
+}
+.settings-nav > button > svg:first-child {
+  width: 21px;
+  height: 21px;
+  flex-shrink: 0;
+}
+.settings-nav > button small,
+.settings-content .card-head p,
+.settings-form-grid .field small,
+.settings-storage p,
+.settings-info p {
+  color: #65715f;
+}
+.settings-info > svg {
+  width: 19px;
+  height: 19px;
+  color: var(--primary, #d67948);
+}
+@media (max-width: 760px) {
+  .settings-shell {
+    gap: 18px;
+  }
+  .settings-nav {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .settings-nav > button {
+    display: flex;
+    flex-direction: row;
+    text-align: left;
+    justify-content: flex-start;
+    gap: 13px;
+    min-height: 64px;
+    padding: 13px 15px;
+    background: #f4f6ef;
+    border-color: #e2e7db;
+    border-radius: 10px;
+  }
+  .settings-nav > button.active {
+    border-color: var(--primary, #d67948);
+    box-shadow: 0 2px 10px #34491d07;
+  }
+  .settings-nav > button > svg:last-child {
+    display: block;
+    width: 16px;
+  }
+  .settings-nav > button strong {
+    font-size: 13px;
+  }
+  .settings-nav > button small {
+    display: block;
+    font-size: 11px;
+    line-height: 1.5;
+    opacity: 1;
+  }
+  .settings-storage {
+    padding: 14px 15px;
+    grid-template-columns: 21px minmax(0, 1fr);
+    gap: 10px;
+  }
+  .settings-storage strong {
+    font-size: 12px;
+  }
+  .settings-storage .settings-status {
+    grid-column: 2;
+    font-size: 11px;
+  }
+  .settings-content .card {
+    padding: 20px 17px;
+  }
+  .settings-content .card-head h2 {
+    font-size: 20px;
+    line-height: 1.4;
+  }
+  .settings-content .card-head p {
+    font-size: 12px;
+  }
+  .settings-content .field > label,
+  .settings-content .field > span {
+    font-size: 12px;
+    color: #384831;
+    line-height: 1.5;
+  }
+  .settings-content .input,
+  .settings-content .select {
+    min-height: 46px;
+    font-size: 14px;
+  }
+  .settings-content .field small {
+    font-size: 11px;
+    line-height: 1.6;
+  }
+  .settings-content .btn,
+  .settings-view > .page-heading .btn {
+    min-height: 46px;
+    font-size: 12px;
+    white-space: normal;
+  }
+  .settings-form-actions > .btn,
+  .settings-savebar > .btn {
+    width: 100%;
+  }
+  .settings-savebar > span {
+    font-size: 11px;
+    line-height: 1.6;
+  }
+  .settings-check {
+    min-height: 52px;
+    gap: 12px;
+  }
+  .settings-check input {
+    width: 21px;
+    height: 21px;
+    flex-shrink: 0;
+  }
+  .settings-data-stats span {
+    font-size: 11px;
+    line-height: 1.5;
+  }
+  .settings-info p {
+    font-size: 12px;
+  }
+  .settings-wire-grid {
+    gap: 12px;
+  }
+  .settings-reset-confirm > div > button {
+    flex: 1;
+    min-height: 46px;
+  }
+}
+@media (max-width: 760px) {
+  .settings-nav {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .settings-nav > button {
+    flex-direction: column;
+    justify-content: center;
+    min-height: 86px;
+    padding: 12px 7px;
+    gap: 8px;
+    text-align: center;
+  }
+  .settings-nav > button > span {
+    flex: none;
+  }
+  .settings-nav > button strong {
+    font-size: 11.5px;
+    line-height: 1.4;
+    color: #405038;
+  }
+  .settings-nav > button small,
+  .settings-nav > button > svg:last-child {
+    display: none;
+  }
+  .settings-nav > button > svg:first-child {
+    width: 23px;
+    height: 23px;
+    color: #6b7c5b;
+  }
+  .settings-nav > button.active > svg:first-child {
+    color: var(--primary, #d67948);
+  }
+  .settings-storage {
+    grid-column: 1/-1;
+    grid-template-columns: 21px minmax(0, 1fr) auto;
+    padding: 13px;
+    gap: 8px;
+  }
+  .settings-storage strong {
+    font-size: 11px;
+  }
+  .settings-storage .settings-status {
+    grid-column: auto;
+    font-size: 10px;
+  }
+}
+@media (max-width: 760px) {
+  .settings-content .input,
+  .settings-content .select {
+    font-size: 16px;
+  }
+}

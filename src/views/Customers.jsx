@@ -14,6 +14,8 @@ import {
   MessageSquare,
   Camera,
   CheckCircle2,
+  PencilLine,
+  BadgeCheck,
 } from "lucide-react";
 import "./records.css";
 
@@ -163,12 +165,7 @@ export function RecordDialog({ title, children, onClose, wide = false }) {
     };
   }, []);
   return (
-    <div
-      className="record-overlay"
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
+    <div className="record-overlay">
       <section
         ref={root}
         className={"record-dialog " + (wide ? "wide" : "")}
@@ -219,14 +216,37 @@ function Input({
   );
 }
 
-export default function Customers({ db, updateDb, notify, onNavigate }) {
+export default function Customers({
+  db,
+  updateDb,
+  notify,
+  onNavigate,
+  initialCustomerId = null,
+}) {
   const [search, setSearch] = useState(""),
     [filter, setFilter] = useState("Tất cả"),
     [modal, setModal] = useState(null),
     [draft, setDraft] = useState(null),
-    [selected, setSelected] = useState(null),
+    [selected, setSelected] = useState(initialCustomerId),
     [log, setLog] = useState(""),
     [error, setError] = useState("");
+  useEffect(() => {
+    if (initialCustomerId) setSelected(initialCustomerId);
+  }, [initialCustomerId]);
+  const detailRef = useRef(null);
+  useEffect(() => {
+    if (selected && window.matchMedia("(max-width: 980px)").matches) {
+      requestAnimationFrame(() =>
+        detailRef.current?.scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+            .matches
+            ? "auto"
+            : "smooth",
+          block: "start",
+        }),
+      );
+    }
+  }, [selected]);
   const customers = db.customers || [],
     selectedCustomer = customers.find((x) => x.id === selected),
     money = (n) => Number(n || 0).toLocaleString("vi-VN") + " đ";
@@ -380,7 +400,16 @@ export default function Customers({ db, updateDb, notify, onNavigate }) {
     notify("Đã lưu khảo sát vào hồ sơ khách.");
   };
   const addPhoto = async (e) => {
-    for (const f of [...e.target.files].slice(0, 4)) {
+    const remaining = Math.max(0, 6 - (draft.survey?.photos?.length || 0));
+    if (!remaining) {
+      notify("Phiếu đã có 6 ảnh. Xóa một ảnh trước khi thêm ảnh mới.");
+      e.target.value = "";
+      return;
+    }
+    const files = [...e.target.files];
+    if (files.length > remaining)
+      notify(`Thêm ${remaining} ảnh đầu tiên; mỗi phiếu lưu tối đa 6 ảnh.`);
+    for (const f of files.slice(0, remaining)) {
       if (!f.type.startsWith("image/") || f.size > 8e6) {
         notify("Chọn ảnh nhỏ hơn 8 MB.");
         continue;
@@ -406,16 +435,20 @@ export default function Customers({ db, updateDb, notify, onNavigate }) {
         image.src = url;
       });
       if (data)
-        setDraft((d) => ({
-          ...d,
-          survey: {
-            ...d.survey,
-            photos: [
-              ...(d.survey?.photos || []),
-              { id: uid(), name: f.name, src: data },
-            ].slice(0, 6),
-          },
-        }));
+        setDraft((d) =>
+          d && d.id === draft.id
+            ? {
+                ...d,
+                survey: {
+                  ...d.survey,
+                  photos: [
+                    ...(d.survey?.photos || []),
+                    { id: uid(), name: f.name, src: data },
+                  ].slice(0, 6),
+                },
+              }
+            : d,
+        );
     }
     e.target.value = "";
   };
@@ -442,7 +475,7 @@ export default function Customers({ db, updateDb, notify, onNavigate }) {
     notify("Đã thêm nhật ký liên hệ.");
   };
   return (
-    <div className="record-page">
+    <div className="record-page customer-page">
       <div className="page-heading">
         <div>
           <span className="eyebrow">RELATIONSHIP / CHĂM SÓC TỪ LẦN ĐẦU</span>
@@ -455,11 +488,17 @@ export default function Customers({ db, updateDb, notify, onNavigate }) {
       </div>
       <div className="record-statrow">
         <div>
-          <span>Khách hàng</span>
+          <span>
+            <Users size={16} />
+            Khách hàng
+          </span>
           <strong>{customers.length.toString().padStart(2, "0")}</strong>
         </div>
         <div>
-          <span>Đang tư vấn</span>
+          <span>
+            <MessageSquare size={16} />
+            Đang tư vấn
+          </span>
           <strong>
             {customers
               .filter((x) =>
@@ -472,7 +511,10 @@ export default function Customers({ db, updateDb, notify, onNavigate }) {
           </strong>
         </div>
         <div>
-          <span>Cần liên hệ hôm nay</span>
+          <span>
+            <CalendarDays size={16} />
+            Cần liên hệ hôm nay
+          </span>
           <strong>
             {customers
               .filter((x) => x.nextContact && x.nextContact <= today())
@@ -481,7 +523,10 @@ export default function Customers({ db, updateDb, notify, onNavigate }) {
           </strong>
         </div>
         <div>
-          <span>Đã chốt</span>
+          <span>
+            <BadgeCheck size={16} />
+            Đã chốt
+          </span>
           <strong>
             {customers
               .filter((x) => ["Đã chốt", "Đã bàn giao"].includes(x.status))
@@ -549,7 +594,7 @@ export default function Customers({ db, updateDb, notify, onNavigate }) {
                           </span>
                         </button>
                       </td>
-                      <td>
+                      <td data-label="Giai đoạn">
                         <span
                           className={
                             "badge " +
@@ -561,7 +606,7 @@ export default function Customers({ db, updateDb, notify, onNavigate }) {
                           {c.status}
                         </span>
                       </td>
-                      <td>
+                      <td data-label="Liên hệ tiếp theo">
                         <span
                           className={
                             c.nextContact && c.nextContact <= today()
@@ -575,7 +620,17 @@ export default function Customers({ db, updateDb, notify, onNavigate }) {
                           {c.assignedTo || "Chưa phân công"}
                         </small>
                       </td>
-                      <td>
+                      <td className="record-rowactions">
+                        {c.phone && (
+                          <a
+                            className="record-quickcall"
+                            href={"tel:" + c.phone.replace(/[^+\d]/g, "")}
+                            aria-label={"Gọi " + c.name}
+                          >
+                            <Phone size={16} />
+                            <span>Gọi khách</span>
+                          </a>
+                        )}
                         <button
                           className="record-icon"
                           onClick={() => setSelected(c.id)}
@@ -610,7 +665,12 @@ export default function Customers({ db, updateDb, notify, onNavigate }) {
           )}
         </section>
         {selectedCustomer && (
-          <aside className="card record-detail">
+          <aside
+            ref={detailRef}
+            className="card record-detail"
+            tabIndex={-1}
+            aria-label="Hồ sơ khách đang chọn"
+          >
             <div className="card-head">
               <span className="eyebrow">HỒ SƠ KHÁCH HÀNG</span>
               <button
@@ -659,7 +719,7 @@ export default function Customers({ db, updateDb, notify, onNavigate }) {
                     target="_blank"
                     rel="noreferrer"
                   >
-                    Zalo <ArrowUpRight size={15} />
+                    <MessageSquare size={15} /> Zalo <ArrowUpRight size={15} />
                   </a>
                 </>
               )}
@@ -667,6 +727,7 @@ export default function Customers({ db, updateDb, notify, onNavigate }) {
                 className="btn btn-secondary"
                 onClick={() => startEdit(selectedCustomer)}
               >
+                <PencilLine size={15} />
                 Sửa hồ sơ
               </button>
             </div>
@@ -745,6 +806,7 @@ export default function Customers({ db, updateDb, notify, onNavigate }) {
                 />
                 <Input
                   label="Số điện thoại"
+                  type="tel"
                   value={draft.phone}
                   onChange={(v) => change("phone", v)}
                 />
