@@ -1,0 +1,53 @@
+.money-input {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  width: 100%;
+}
+.money-input > input {
+  width: 100%;
+  min-width: 0;
+}
+.money-input-hint {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 8px;
+  line-height: 1.55;
+  font-size: 10px !important;
+  color: #75889a !important;
+  font-weight: 400;
+}
+.money-input-hint b {
+  font-weight: 600;
+  color: #216695;
+}
+.money-input-hint span {
+  font-size: 9px;
+  color: #7d8fa0;
+}
+.money-input.has-error > input {
+  border-color: #c86e50 !important;
+  background: #fff9f5;
+}
+.money-input.has-error .money-input-hint {
+  color: #b54d2b !important;
+}
+.money-input-compact .money-input-hint {
+  font-size: 9px !important;
+}
+.money-input-compact .money-input-hint span {
+  display: none;
+}
+@media (max-width: 780px) {
+  .money-input > input {
+    font-size: 16px !important;
+    min-height: 44px;
+  }
+  .money-input-hint {
+    font-size: 11px !important;
+  }
+  .money-input-hint span {
+    font-size: 10px;
+  }
+}

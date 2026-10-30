@@ -588,7 +588,7 @@
   letter-spacing: -1px;
   background: #fcfbf6;
 }
-.calc-money-input > span {
+.calc-money-input > span:not(.money-input) {
   font-size: 9px;
   position: absolute;
   right: 12px;
@@ -1205,7 +1205,7 @@
   color: #aaa28f;
   text-align: center;
 }
-.comparison-row {
+.calculator-workspace .comparison-row {
   display: grid;
   grid-template-columns: 1.25fr 1fr 1fr;
   gap: 10px;
@@ -1214,16 +1214,16 @@
   font-size: 11px;
   color: #8f9280;
 }
-.comparison-row > span:not(:first-child),
-.comparison-row > strong {
+.calculator-workspace .comparison-row > span:not(:first-child),
+.calculator-workspace .comparison-row > strong {
   text-align: right;
 }
-.comparison-row > strong {
+.calculator-workspace .comparison-row > strong {
   font-size: 11px;
   color: #778b60;
   font-weight: 500;
 }
-.comparison-row.head {
+.calculator-workspace .comparison-row.head {
   font-size: 9px;
   color: #a2a48e;
   background: #f7f6ef;
@@ -2016,13 +2016,13 @@
     font-size: 8px;
     white-space: nowrap;
   }
-  .comparison-row {
+  .calculator-workspace .comparison-row {
     font-size: 9px;
     grid-template-columns: 1fr 0.9fr 0.9fr;
     gap: 7px;
     line-height: 1.7;
   }
-  .comparison-row > strong {
+  .calculator-workspace .comparison-row > strong {
     font-size: 9px;
   }
   .calc-check-item p {
@@ -2239,8 +2239,8 @@
     min-height: 44px;
     font-size: 11px;
   }
-  .comparison-row,
-  .comparison-row > strong {
+  .calculator-workspace .comparison-row,
+  .calculator-workspace .comparison-row > strong {
     font-size: 11px;
     line-height: 1.7;
   }
@@ -2265,4 +2265,30 @@
     font-size: 11px;
     padding: 10px 8px;
   }
+}
+
+/* Compact money editing: decoded VND stays visible, with no floating unit overlay. */
+.calc-money-input .money-input {
+  position: static;
+}
+.calc-money-input .money-input > input {
+  padding-right: 13px;
+}
+.calc-money-input .money-input-hint {
+  margin: 1px 0 0;
+  letter-spacing: 0;
+}
+.calc-linked-customer {
+  margin: 12px 23px 0;
+  padding: 10px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  color: #237b70;
+  background: #edf8f3;
+  border: 1px solid #d8eee4;
+  border-radius: 9px;
+  font-size: 11px;
+  line-height: 1.6;
 }

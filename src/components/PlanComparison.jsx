@@ -48,8 +48,16 @@ function savedDate(value) {
     : date.toLocaleDateString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" });
 }
 
-export default function PlanComparison({ plans = [], onOpen, onQuote }) {
-  const [open, setOpen] = useState(false);
+export default function PlanComparison({
+  plans = [],
+  onOpen,
+  onQuote,
+  initialOpen = false,
+}) {
+  const [open, setOpen] = useState(Boolean(initialOpen));
+  useEffect(() => {
+    if (initialOpen) setOpen(true);
+  }, [initialOpen]);
   const [selectedIds, setSelectedIds] = useState([]);
   const contentId = useId();
   const available = plans.filter((plan) => plan && typeof plan.id === "string");

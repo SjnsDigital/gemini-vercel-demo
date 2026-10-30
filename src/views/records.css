@@ -1815,3 +1815,44 @@
     padding: 16px;
   }
 }
+
+.record-nextsteps {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0 8px;
+  padding: 15px 0;
+  border-top: 1px solid #e5edf5;
+  border-bottom: 1px solid #e5edf5;
+}
+.record-nextsteps .eyebrow {
+  font-size: 9px;
+}
+.record-nextsteps .btn {
+  width: 100%;
+  justify-content: flex-start;
+  min-height: 44px;
+  padding: 10px 12px;
+  font-size: 11px;
+  white-space: normal;
+  text-align: left;
+}
+.record-nextsteps .btn svg:last-child {
+  margin-left: auto;
+  flex: none;
+}
+.record-nextsteps > small {
+  font-size: 10px;
+  color: #7a8ea2;
+  line-height: 1.7;
+}
+.record-page .money-input-hint {
+  margin: 0;
+}
+@media (max-width: 780px) {
+  .record-nextsteps .btn {
+    font-size: 12px;
+  }
+  .record-nextsteps > small {
+    font-size: 11px;
+  }
+}

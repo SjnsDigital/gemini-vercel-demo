@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Plus,
   Search,
@@ -28,6 +28,8 @@ import {
 import { categories } from "../lib/seed";
 import { RecordDialog } from "./Customers";
 import "./records.css";
+import MoneyInput from "../components/MoneyInput.jsx";
+import { searchText } from "../lib/workflow.js";
 
 const categoryIcons = {
   panel: Sun,
@@ -147,6 +149,8 @@ export default function Catalog({
   notify,
   onNavigate,
   initialQuery = "",
+  assistantAction = null,
+  onConsumedAssistantAction,
 }) {
   const [search, setSearch] = useState(initialQuery),
     [category, setCategory] = useState("all"),
@@ -159,6 +163,41 @@ export default function Catalog({
     setSearch(String(initialQuery || ""));
     if (initialQuery) setStatus("all");
   }, [initialQuery]);
+  const consumedAssistant = useRef(null);
+  useEffect(() => {
+    if (!assistantAction || consumedAssistant.current === assistantAction)
+      return;
+    consumedAssistant.current = assistantAction;
+    if (assistantAction.type === "new-product") {
+      setDraft({
+        ...blank(),
+        ...(assistantAction.product || {}),
+        id: undefined,
+      });
+      setError("");
+    } else if (assistantAction.type === "filter") {
+      setSearch(String(assistantAction.query || ""));
+      setStatus(
+        assistantAction.onlyMissingPrice
+          ? "missing-price"
+          : [
+                "all",
+                "active",
+                "inactive",
+                "unverified",
+                "missing-price",
+              ].includes(assistantAction.filter)
+            ? assistantAction.filter
+            : "all",
+      );
+      setCategory(
+        assistantAction.category && categories[assistantAction.category]
+          ? assistantAction.category
+          : "all",
+      );
+    }
+    onConsumedAssistantAction?.();
+  }, [assistantAction, onConsumedAssistantAction]);
   const products = db.products || [],
     filtered = products
       .filter(
@@ -169,11 +208,11 @@ export default function Catalog({
               ? p.active
               : status === "unverified"
                 ? p.active && !p.verified
-                : !p.active)) &&
+                : status === "missing-price"
+                  ? p.active !== false && !(Number(p.price) > 0)
+                  : !p.active)) &&
           [p.brand, p.model, p.description].some((s) =>
-            String(s || "")
-              .toLowerCase()
-              .includes(search.toLowerCase()),
+            searchText(s).includes(searchText(search)),
           ),
       )
       .sort((a, b) =>
@@ -224,7 +263,7 @@ export default function Catalog({
     }
     if (
       draft.image &&
-      !/^(https:\/\/|\/assets\/|data:image\/(jpeg|png|webp);base64,)/i.test(
+      !/^(https:\/\/|\/(?:gemini-vercel-demo\/)?assets\/|data:image\/(jpeg|png|webp);base64,)/i.test(
         draft.image,
       )
     ) {
@@ -437,6 +476,7 @@ export default function Catalog({
               <option value="all">Mọi trạng thái</option>
               <option value="active">Đang sử dụng</option>
               <option value="unverified">Cần xác minh</option>
+              <option value="missing-price">Đang dùng · chưa có giá</option>
               <option value="inactive">Chưa kích hoạt</option>
             </select>
             <div className="record-layouttoggle">
@@ -693,24 +733,26 @@ export default function Catalog({
                   <div className="form-grid">
                     <label className="field">
                       <span>Giá bán (đ)</span>
-                      <input
+                      <MoneyInput
                         className="input"
-                        type="number"
-                        min="0"
+                        aria-label="Giá bán (đ)"
+                        compact
+                        min={0}
+                        max={1e12}
                         value={draft.price}
-                        onChange={(e) => change("price", e.target.value)}
+                        onChange={(value) => change("price", value)}
                       />
                     </label>
                     <label className="field">
                       <span>Giá nhập tham khảo (đ)</span>
-                      <input
+                      <MoneyInput
                         className="input"
-                        type="number"
-                        min="0"
-                        value={draft.purchasePrice || 0}
-                        onChange={(e) =>
-                          change("purchasePrice", e.target.value)
-                        }
+                        aria-label="Giá nhập tham khảo (đ)"
+                        compact
+                        min={0}
+                        max={1e12}
+                        value={draft.purchasePrice ?? 0}
+                        onChange={(value) => change("purchasePrice", value)}
                       />
                     </label>
                   </div>

@@ -1,8 +1,8 @@
-# Phát hành công khai Kim Solar 2.2
+# Phát hành công khai Kim Solar 2.3
 
 Địa chỉ chính của bản mới: **https://sjnsdigital.github.io/gemini-vercel-demo/**.
 
-Bản 2.2 dùng GitHub Pages cho repository công khai. Truy cập ứng dụng không yêu cầu tài khoản GitHub hoặc Vercel. Nhánh gh-pages chỉ chứa build tĩnh; main được giữ nguyên.
+Bản 2.3 dùng GitHub Pages cho repository công khai. Truy cập ứng dụng không yêu cầu tài khoản GitHub hoặc Vercel. Nhánh gh-pages chỉ chứa build tĩnh; main được giữ nguyên.
 
 ## Lệnh build
 
@@ -28,3 +28,11 @@ Kết nối Supabase tùy chọn vẫn cần dự án và tài khoản của doa
 Cập nhật bằng commit fast-forward trên nhánh gh-pages hiện hữu, không tạo lại cấu hình Pages và không force-push. Chỉ phát hành build Pages đã qua kiểm thử; ghi nhận SHA nguồn, SHA artifact và xác nhận builds/latest đúng artifact. Nếu có phát hành đồng thời, push phải từ chối để kiểm tra lại trước khi cập nhật.
 
 Bản 2.2 không thay khóa lưu trữ kimsolar.workspace.v2; dữ liệu trình duyệt đang có tiếp tục được dùng. So sánh dùng bản chụp đã lưu; chỉ mở lại máy tính mới áp dụng bảng giá hiện hành.
+
+## Cập nhật bản 2.3
+
+Không có dịch vụ mô hình AI phía máy chủ. Trợ lý nghiệp vụ và nhập rút gọn chạy trong build tĩnh, không yêu cầu người dùng cấp API key. Không đưa khóa vào bundle để triển khai trên Pages.
+
+Logo SVG có ảnh nguồn nhúng và bộ lọc alpha; không tải logo ngoài. Ảnh thiết bị do người dùng chọn được chuyển thành WebP trong dữ liệu cục bộ; chỉ ảnh danh mục ban đầu/logo/ảnh minh họa đi cùng build công khai. Không đưa file backup có hồ sơ thật vào gh-pages.
+
+Phát hành vẫn dùng commit fast-forward gh-pages riêng, xác nhận Pages build đúng artifact và public:true/HTTPS, giữ main nguyên trạng. Tài nguyên JS/CSS có hash; có thể thêm ?v=2.3 vào link để làm mới trang khi trình duyệt đang giữ index cũ.

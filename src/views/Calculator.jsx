@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { calculate, defaults, REGIONS } from "../lib/calculator";
 import "./calculator.css";
+import MoneyInput from "../components/MoneyInput.jsx";
 
 const number = (n, digits = 1) =>
   Number(n || 0).toLocaleString("vi-VN", { maximumFractionDigits: digits });
@@ -490,6 +491,14 @@ export default function Calculator({
   const [planName, setPlanName] = useState(
     initialPlan?.name || "Phương án điện mặt trời",
   );
+  const [linkedCustomerId, setLinkedCustomerId] = useState(
+    initialPlan?.customerId || "",
+  );
+  const [moneyValidity, setMoneyValidity] = useState({
+    bill: true,
+    export: true,
+  });
+  const inputForm = useRef(null);
   const [resultTab, setResultTab] = useState("overview");
   const [showAssumptions, setShowAssumptions] = useState(false);
   const [openSections, setOpenSections] = useState(() =>
@@ -507,6 +516,7 @@ export default function Calculator({
       consumed.current = initialPlan;
       setInput({ ...defaults, ...initialPlan.input });
       setPlanName(initialPlan.name || "Phương án điện mặt trời");
+      setLinkedCustomerId(initialPlan.customerId || "");
       onConsumedPlan?.();
     }
   }, [initialPlan, onConsumedPlan]);
@@ -563,11 +573,22 @@ export default function Calculator({
   );
   const plan = () => ({
     id: initialPlan?.id,
+    customerId: linkedCustomerId,
     name: planName.trim() || "Phương án điện mặt trời",
     input: { ...input },
     result,
     createdAt: new Date().toISOString(),
   });
+  const moneyValid =
+    (input.inputMode !== "bill" || moneyValidity.bill) && moneyValidity.export;
+  const runPlanAction = (callback) => {
+    if (!moneyValid || !inputForm.current?.checkValidity()) {
+      setOpenSections(["usage", "roof", "system"]);
+      requestAnimationFrame(() => inputForm.current?.reportValidity());
+      return;
+    }
+    callback?.(plan());
+  };
   const choosePanel = (id) => {
     const p = panels.find((p) => p.id === id);
     setInput((i) => ({
@@ -618,6 +639,7 @@ export default function Calculator({
             onClick={() => {
               setInput({ ...defaults });
               setPlanName("Phương án điện mặt trời");
+              setLinkedCustomerId("");
             }}
           >
             <RotateCcw size={15} />
@@ -625,8 +647,8 @@ export default function Calculator({
           </button>
           <button
             className="btn btn-primary"
-            disabled={!result.valid}
-            onClick={() => onSavePlan?.(plan())}
+            disabled={!result.valid || !moneyValid}
+            onClick={() => runPlanAction(onSavePlan)}
           >
             <Save size={16} />
             Lưu phương án
@@ -646,8 +668,8 @@ export default function Calculator({
         </span>
         <span className="flow-line" />
         <button
-          disabled={!result.valid}
-          onClick={() => onCreateQuote?.(plan())}
+          disabled={!result.valid || !moneyValid}
+          onClick={() => runPlanAction(onCreateQuote)}
         >
           <i>03</i>Báo giá & chia sẻ
           <ArrowRight size={13} />
@@ -659,6 +681,7 @@ export default function Calculator({
       </div>
       <div className="calc-workbench">
         <form
+          ref={inputForm}
           className="calc-input-panel card"
           onSubmit={(e) => e.preventDefault()}
         >
@@ -680,6 +703,16 @@ export default function Calculator({
               placeholder="VD: Nhà phố gia đình Anh Minh"
             />
           </Field>
+          {linkedCustomerId &&
+            db.customers?.find((c) => c.id === linkedCustomerId) && (
+              <p className="calc-linked-customer">
+                <Check size={14} />
+                Đang tư vấn:{" "}
+                <strong>
+                  {db.customers.find((c) => c.id === linkedCustomerId).name}
+                </strong>
+              </p>
+            )}
           <nav className="calc-input-jump" aria-label="Đi nhanh đến thông số">
             {[
               ["usage", "Nhu cầu"],
@@ -729,25 +762,26 @@ export default function Calculator({
               {input.inputMode === "bill" ? (
                 <Field
                   label="Hóa đơn trung bình / tháng"
-                  hint="Giá đã gồm VAT điện. Nhập số VNĐ đầy đủ."
+                  hint="Giá gồm VAT. Nhập 2.2 = 2,2 triệu; 500k = 500 nghìn."
                 >
                   <div className="calc-money-input">
-                    <input
+                    <MoneyInput
                       aria-label="Hóa đơn trung bình tháng"
                       className="input"
-                      type="number"
-                      inputMode="numeric"
-                      min="1"
-                      max="500000000"
+                      min={1}
+                      max={500000000}
+                      required
+                      compact
                       value={input.monthlyBill}
-                      onChange={(e) =>
-                        update(
-                          "monthlyBill",
-                          e.target.value === "" ? "" : Number(e.target.value),
+                      onChange={(value) => update("monthlyBill", value)}
+                      onValidityChange={(valid) =>
+                        setMoneyValidity((current) =>
+                          current.bill === valid
+                            ? current
+                            : { ...current, bill: valid },
                         )
                       }
                     />
-                    <span>VNĐ</span>
                   </div>
                 </Field>
               ) : (
@@ -1190,7 +1224,22 @@ export default function Calculator({
                 label="Giá bán điện dư (đ/kWh)"
                 hint="Mặc định 0. Chỉ nhập khi có cơ chế mua điện được xác nhận."
               >
-                {numInput("exportPrice", { min: 0, max: 20000 })}
+                <MoneyInput
+                  aria-label="Giá bán điện dư (đ/kWh)"
+                  value={input.exportPrice}
+                  defaultScale={1000}
+                  min={0}
+                  max={20000}
+                  compact
+                  onChange={(value) => update("exportPrice", value)}
+                  onValidityChange={(valid) =>
+                    setMoneyValidity((current) =>
+                      current.export === valid
+                        ? current
+                        : { ...current, export: valid },
+                    )
+                  }
+                />
               </Field>
             </div>
           </details>
@@ -1614,14 +1663,16 @@ export default function Calculator({
                 <div className="calc-action-buttons">
                   <button
                     className="btn btn-secondary"
-                    onClick={() => onShare?.(plan())}
+                    disabled={!moneyValid}
+                    onClick={() => runPlanAction(onShare)}
                   >
                     <Link2 size={16} />
                     Link / QR / ảnh
                   </button>
                   <button
                     className="btn btn-primary"
-                    onClick={() => onCreateQuote?.(plan())}
+                    disabled={!moneyValid}
+                    onClick={() => runPlanAction(onCreateQuote)}
                   >
                     Tạo báo giá
                     <ArrowUpRight size={17} />

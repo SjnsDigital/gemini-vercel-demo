@@ -40,3 +40,20 @@ Nguồn cũ được giữ ở lịch sử Git. Không đưa hồ sơ khách th�
 - Kiểm tra chuyên biệt360px: điện thoại+84/0 được nhận là cùng số, liên kết gọi/Zalo đúng, tỷ lệngày ngoài0–100bị chặn; lọcCSKH bỏphiếuđãđóng, sắp xếpgiá không đẩygiáchưa có lênđầu.
 
 Bằng chứng trình duyệt được lưu ngoài mã nguồn tại `/workspace/kimsolar-v22-validation/`. Không có backend AI hoặc giám sát điện thực tế mới; SVG là hướng dẫn và mô hình ước tính. Giới hạn Supabase thật và xác minh dữ liệu thương mại từ bản2.0/2.1 vẫn áp dụng.
+
+## Nâng cấp nghiệp vụ 2.3 — 30/10/2026
+
+- Bảy file unit test đều đạt: bổ sung parser tiền rút gọn và round-trip giá lưu, đơn vị riêng đ/kWh, bộ kỹ năng trợ lý cho 10 mục, ngày Việt Nam/ngày không tồn tại/tên khách Mai, cấu hình tiền–mái–pha, cảnh báo dữ liệu thật và tác vụ không hỗ trợ.
+- Production Pages build thành công; JS khởi đầu khoảng 106 KB gzip. Không thêm thư viện chat, khóa API hoặc dịch vụ mô hình AI giả lập.
+- `smart_workspace.py`: `2.2`, `2`, `2tr2` hiểu đúng; giá không hợp lệ chặn lưu/xuất/tạo báo giá. Ảnh dòng báo giá tải lên, nhớ vào danh mục, lưu/reload và tách biệt giữa các phiên bản. PDF thật; trợ lý xem trước rồi mới thêm lịch, điền cấu hình hoặc mở form khách. Kiểm tra 360/390/768/1280 px và không lỗi JavaScript.
+- `assistant_handoffs.py`: tiền nhập trực tiếp ở tra nhanh → máy tính → lưu; lệnh mở so sánh và tra cẩm nang áp dụng lại sau chỉnh tay; trợ lý thực sự đổi bộ lọc thiết bị và báo giá, mở editor mới; định mức nhập `2.2` lưu 2.200.000 đ; sao lưu tải file JSON đầy đủ.
+- Toàn bộ quotes E2E chạy trên build Pages: 13 dòng, số tiền, PDF/PNG, phiên bản, khảo sát/xác minh giá, chặn cấu hình số tấm khác, QR thật và ảnh 1080, trang khách độc lập, mobile, không lỗi JavaScript.
+- PDF được render xem trực tiếp các trang: đã sửa lỗi margin tính sẵn gây lệch/cắt logo và cột giá khi html-to-image chụp; cột hãng/tổng thanh toán và tương phản đã chỉnh. Trang có nhiều ảnh/thông số tự chia A4 theo độ dài, không cắt ngang dòng.
+- Toàn bộ records E2E production đạt. Thử riêng tiền bán/giá nhập/khảo sát, chặn giá sai/trống, hồ sơ khách → cấu hình → CSKH đúng liên kết và không tự đánh dấu khảo sát đã kiểm tra. Catalog chấp nhận đường dẫn ảnh có prefix GitHub Pages khi sửa.
+- Đơn giá điện có nhãn riêng: `2.2` = 2.200 đ/kWh; giá sai chặn tạo báo giá, số lưu và chuỗi giải thích đều được kiểm tra.
+- Logo SVG nhúng đúng PNG nguồn, bộ lọc loại nền: kích thước tự nhiên 720×278, 152.377 pixel nền trong suốt, 45.688 pixel màu chính giữ nguyên, canvas xuất/đọc PNG thành công. Hiệu ứng tắt khi giảm chuyển động hoặc in. Hai kết quả logo tạo ảnh có nhiễu bị loại, không đưa vào build.
+- `navigation.py`: đủ 10 trang tại 360/390/768/1280 px, ảnh/logo tải đúng, không lỗi tài nguyên hoặc JavaScript. `interactions.py`: các thao tác từ bản 2.2 tiếp tục đạt.
+
+Bằng chứng được giữ ngoài source ở `/workspace/kimsolar-v23-validation/`. Ảnh/hồ sơ người dùng lưu trong trình duyệt và đi cùng sao lưu, không tự ghi lên tài nguyên công khai của mọi người. Trợ lý dùng kỹ năng nghiệp vụ cục bộ; giới hạn dữ liệu nguồn cần xác minh và backend Supabase chưa kiểm thử thật vẫn áp dụng.
+
+Kiểm tra ảnh toàn trang còn phát hiện CSS `.comparison-row` của máy tính tác động dashboard sau khi tải trang tính. Đã giới hạn selector trong `.calculator-workspace`; bài smart E2E kiểm tra sau chuyển nhiều trang rằng hàng năng lượng dashboard giữ `display:block` và nhãn đủ chiều rộng, rồi chụp lại ảnh mobile.

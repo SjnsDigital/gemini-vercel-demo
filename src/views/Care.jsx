@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Plus,
   Search,
@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { RecordDialog, cleanContactPhone, zaloContact } from "./Customers";
 import "./records.css";
+import { searchText } from "../lib/workflow.js";
 
 const statuses = [
   "Mới tiếp nhận",
@@ -53,11 +54,46 @@ const blank = () => ({
   resolution: "",
   history: [],
 });
-export default function Care({ db, updateDb, notify }) {
+export default function Care({
+  db,
+  updateDb,
+  notify,
+  assistantAction = null,
+  onConsumedAssistantAction,
+}) {
   const [search, setSearch] = useState(""),
     [filter, setFilter] = useState("Đang mở"),
     [draft, setDraft] = useState(null),
     [error, setError] = useState("");
+  const consumedAssistant = useRef(null);
+  useEffect(() => {
+    if (!assistantAction || consumedAssistant.current === assistantAction)
+      return;
+    consumedAssistant.current = assistantAction;
+    if (assistantAction.type === "new-ticket") {
+      setDraft({
+        ...blank(),
+        ...(assistantAction.ticket || {}),
+        id: undefined,
+      });
+      setError("");
+    } else if (assistantAction.type === "filter") {
+      setSearch(String(assistantAction.query || ""));
+      setFilter(
+        [
+          "Tất cả",
+          "Đang mở",
+          "Quá hạn",
+          "Hôm nay",
+          "Ưu tiên cao",
+          ...statuses,
+        ].includes(assistantAction.filter)
+          ? assistantAction.filter
+          : "Đang mở",
+      );
+    }
+    onConsumedAssistantAction?.();
+  }, [assistantAction, onConsumedAssistantAction]);
   const tickets = db.tickets || [],
     customers = db.customers || [],
     closed = (t) => ["Đã giải quyết", "Đã đóng"].includes(t.status),
@@ -85,11 +121,7 @@ export default function Care({ db, updateDb, notify }) {
         t.assignedTo,
         customer(t.customerId)?.name,
         customer(t.customerId)?.phone,
-      ].some((v) =>
-        String(v || "")
-          .toLowerCase()
-          .includes(search.toLowerCase()),
-      ),
+      ].some((v) => searchText(v).includes(searchText(search))),
   );
   const change = (key, value) => setDraft((d) => ({ ...d, [key]: value }));
   const save = (e) => {

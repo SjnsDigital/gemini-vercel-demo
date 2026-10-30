@@ -1,0 +1,91 @@
+.lookup-smart-entry {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(0, 1.3fr);
+  gap: 28px;
+  align-items: center;
+  padding: 25px;
+  margin-bottom: 24px;
+  background: linear-gradient(120deg, #fff, #f3f8ff);
+  border: 1px solid #dbe8f6;
+}
+.lookup-smart-entry h2 {
+  font-size: 20px;
+  margin: 8px 0 18px;
+  line-height: 1.5;
+}
+.lookup-smart-entry label {
+  display: block;
+  font-size: 12px;
+  color: #5a728c;
+  margin-bottom: 7px;
+}
+.lookup-smart-entry .money-input {
+  max-width: 380px;
+}
+.lookup-smart-entry input {
+  font-size: 24px;
+  font-weight: 650;
+  min-height: 58px;
+}
+.lookup-smart-result {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 20px 12px;
+}
+.lookup-smart-result small {
+  display: block;
+  font-size: 11px;
+  color: #7389a0;
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+.lookup-smart-result strong {
+  display: block;
+  font-size: 25px;
+  color: #1b659e;
+  letter-spacing: -0.8px;
+}
+.lookup-smart-result strong em {
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 500;
+}
+.lookup-smart-result .btn {
+  grid-column: 1/-1;
+  justify-self: start;
+  min-height: 46px;
+}
+@media (max-width: 1000px) {
+  .lookup-smart-entry {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .lookup-smart-entry .money-input {
+    max-width: 100%;
+  }
+  .lookup-smart-result {
+    grid-template-columns: 1fr 1.5fr;
+  }
+}
+@media (max-width: 600px) {
+  .lookup-smart-entry {
+    padding: 20px;
+    gap: 20px;
+  }
+  .lookup-smart-entry h2 {
+    font-size: 18px;
+  }
+  .lookup-smart-result {
+    gap: 16px 8px;
+  }
+  .lookup-smart-result strong {
+    font-size: 21px;
+  }
+  .lookup-smart-result small {
+    font-size: 10px;
+  }
+  .lookup-smart-result .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

@@ -1,6 +1,7 @@
 import React, { useId, useState } from "react";
 import { ChevronDown, Lightbulb, Pause, Play } from "lucide-react";
 import "./page-agent.css";
+import AgentWorkbench from "./AgentWorkbench.jsx";
 
 const guides = {
   overview: {
@@ -576,56 +577,61 @@ function AgentArtwork({ route }) {
   );
 }
 
-export default function PageAgent({ route = "overview" }) {
+export default function PageAgent({ route = "overview", db, onAction }) {
   const [expanded, setExpanded] = useState(false);
   const [paused, setPaused] = useState(false);
   const guide = guides[route] || guides.overview;
   const detailsId = useId();
   return (
-    <section
-      className={`page-agent page-agent-${guide.accent}${paused ? " is-paused" : ""}`}
-      aria-label={`Gợi ý thao tác: ${guide.name}`}
-    >
-      <div className="page-agent-picture">
-        <AgentArtwork route={guide.symbol} />
-      </div>
-      <div className="page-agent-copy">
-        <span className="page-agent-label">
-          <span />
-          {guide.name}
-        </span>
-        <p>{guide.short}</p>
-        <div id={detailsId} className="page-agent-detail" hidden={!expanded}>
-          {guide.detail}
+    <>
+      <section
+        className={`page-agent page-agent-${guide.accent}${paused ? " is-paused" : ""}`}
+        aria-label={`Gợi ý thao tác: ${guide.name}`}
+      >
+        <div className="page-agent-picture">
+          <AgentArtwork route={guide.symbol} />
         </div>
-      </div>
-      <div className="page-agent-controls">
-        <button
-          type="button"
-          className="page-agent-tip"
-          aria-expanded={expanded}
-          aria-controls={detailsId}
-          onClick={() => setExpanded((value) => !value)}
-        >
-          <Lightbulb size={16} />
-          <span>{expanded ? "Thu gọn" : "Mẹo sử dụng"}</span>
-          <ChevronDown size={14} />
-        </button>
-        <button
-          type="button"
-          className="page-agent-motion"
-          aria-label={
-            paused
-              ? "Bật chuyển động biểu tượng"
-              : "Tạm dừng chuyển động biểu tượng"
-          }
-          aria-pressed={paused}
-          title={paused ? "Bật chuyển động" : "Tạm dừng chuyển động"}
-          onClick={() => setPaused((value) => !value)}
-        >
-          {paused ? <Play size={13} /> : <Pause size={13} />}
-        </button>
-      </div>
-    </section>
+        <div className="page-agent-copy">
+          <span className="page-agent-label">
+            <span />
+            {guide.name}
+          </span>
+          <p>{guide.short}</p>
+          <div id={detailsId} className="page-agent-detail" hidden={!expanded}>
+            {guide.detail}
+          </div>
+        </div>
+        <div className="page-agent-controls">
+          <button
+            type="button"
+            className="page-agent-tip"
+            aria-expanded={expanded}
+            aria-controls={detailsId}
+            onClick={() => setExpanded((value) => !value)}
+          >
+            <Lightbulb size={16} />
+            <span>{expanded ? "Thu gọn" : "Mẹo sử dụng"}</span>
+            <ChevronDown size={14} />
+          </button>
+          <button
+            type="button"
+            className="page-agent-motion"
+            aria-label={
+              paused
+                ? "Bật chuyển động biểu tượng"
+                : "Tạm dừng chuyển động biểu tượng"
+            }
+            aria-pressed={paused}
+            title={paused ? "Bật chuyển động" : "Tạm dừng chuyển động"}
+            onClick={() => setPaused((value) => !value)}
+          >
+            {paused ? <Play size={13} /> : <Pause size={13} />}
+          </button>
+        </div>
+      </section>
+      {db && onAction && (
+        <AgentWorkbench route={route} db={db} onAction={onAction} />
+      )}
+    </>
   );
 }

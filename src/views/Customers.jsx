@@ -16,8 +16,12 @@ import {
   CheckCircle2,
   PencilLine,
   BadgeCheck,
+  Calculator as CalculatorIcon,
+  LifeBuoy,
 } from "lucide-react";
 import "./records.css";
+import MoneyInput from "../components/MoneyInput.jsx";
+import { searchText } from "../lib/workflow.js";
 
 const stages = [
   "Mới tiếp nhận",
@@ -240,6 +244,8 @@ export default function Customers({
   notify,
   onNavigate,
   initialCustomerId = null,
+  assistantAction = null,
+  onConsumedAssistantAction,
 }) {
   const [search, setSearch] = useState(""),
     [filter, setFilter] = useState("Tất cả"),
@@ -251,6 +257,37 @@ export default function Customers({
   useEffect(() => {
     if (initialCustomerId) setSelected(initialCustomerId);
   }, [initialCustomerId]);
+  const consumedAssistant = useRef(null);
+  useEffect(() => {
+    if (!assistantAction || consumedAssistant.current === assistantAction)
+      return;
+    consumedAssistant.current = assistantAction;
+    if (["new-customer", "create-customer"].includes(assistantAction.type)) {
+      const source = assistantAction.customer || {};
+      const customer = {
+        ...emptyCustomer(),
+        ...source,
+        survey: {
+          ...(source.survey || {}),
+          ...(source.monthlyBill != null ? { bill: source.monthlyBill } : {}),
+        },
+      };
+      delete customer.id;
+      setDraft(customer);
+      setModal("edit");
+      setError("");
+    } else if (assistantAction.type === "open-customer") {
+      setSelected(assistantAction.customerId || null);
+    } else if (assistantAction.type === "filter") {
+      setSearch(String(assistantAction.query || ""));
+      setFilter(
+        ["Tất cả", "Cần liên hệ", ...stages].includes(assistantAction.filter)
+          ? assistantAction.filter
+          : "Tất cả",
+      );
+    }
+    onConsumedAssistantAction?.();
+  }, [assistantAction, onConsumedAssistantAction]);
   const detailRef = useRef(null);
   useEffect(() => {
     if (selected && window.matchMedia("(max-width: 980px)").matches) {
@@ -279,9 +316,7 @@ export default function Customers({
       (filter === "Tất cả" ||
         (filter === "Cần liên hệ" ? needsContact(c) : c.status === filter)) &&
       [c.name, c.phone, c.address, c.assignedTo].some((v) =>
-        String(v || "")
-          .toLocaleLowerCase("vi")
-          .includes(search.toLocaleLowerCase("vi")),
+        searchText(v).includes(searchText(search)),
       ),
   );
   const close = () => {
@@ -295,6 +330,42 @@ export default function Customers({
     setModal("edit");
   };
   const change = (key, value) => setDraft((d) => ({ ...d, [key]: value }));
+  const calculateForCustomer = (customer) => {
+    const survey = customer.survey || {};
+    const positive = (value) =>
+      Number.isFinite(Number(value)) && Number(value) > 0;
+    const input = {};
+    if (positive(survey.bill || customer.monthlyBill))
+      input.monthlyBill = Number(survey.bill || customer.monthlyBill);
+    else if (positive(survey.kwh)) {
+      input.inputMode = "kwh";
+      input.monthlyKwh = Number(survey.kwh);
+    }
+    if (positive(survey.rl)) input.roofLength = Number(survey.rl);
+    if (positive(survey.rw)) input.roofWidth = Number(survey.rw);
+    if (positive(survey.floors)) input.floors = Number(survey.floors);
+    if (
+      survey.day !== "" &&
+      survey.day != null &&
+      Number.isFinite(Number(survey.day)) &&
+      Number(survey.day) >= 0 &&
+      Number(survey.day) <= 100
+    )
+      input.dayRatio = Number(survey.day) / 100;
+    if (survey.pha) input.phase = String(survey.pha).includes("3") ? 3 : 1;
+    if (survey.htype)
+      input.tariff =
+        survey.htype === "Kinh doanh"
+          ? "business"
+          : survey.htype === "Sản xuất"
+            ? "production"
+            : "residential";
+    onNavigate?.("calculator", {
+      name: "Phương án · " + customer.name,
+      customerId: customer.id,
+      input,
+    });
+  };
   const saveCustomer = (e) => {
     e.preventDefault();
     const name = draft.name.trim(),
@@ -820,6 +891,45 @@ export default function Customers({
                 ? "Mở phiếu khảo sát"
                 : "Tạo phiếu khảo sát"}
             </button>
+            <div className="record-nextsteps">
+              <span className="eyebrow">TIẾP TỤC TỪ HỒ SƠ NÀY</span>
+              <button
+                className="btn btn-secondary"
+                onClick={() => calculateForCustomer(selectedCustomer)}
+              >
+                <CalculatorIcon size={16} />
+                Tính phương án từ nhu cầu
+                <ArrowUpRight size={14} />
+              </button>
+              <button
+                className="btn btn-secondary"
+                onClick={() =>
+                  onNavigate?.("care", {
+                    assistantAction: {
+                      id: uid(),
+                      type: "new-ticket",
+                      ticket: { customerId: selectedCustomer.id },
+                    },
+                  })
+                }
+              >
+                <LifeBuoy size={16} />
+                Tạo yêu cầu chăm sóc
+                <ArrowUpRight size={14} />
+              </button>
+              <small>
+                {Number(
+                  selectedCustomer.survey?.bill || selectedCustomer.monthlyBill,
+                ) > 0
+                  ? "Hóa đơn " +
+                    money(
+                      selectedCustomer.survey?.bill ||
+                        selectedCustomer.monthlyBill,
+                    ) +
+                    "/tháng được điền sẵn khi tính."
+                  : "Thông số đã lưu được điền sẵn; bổ sung phần còn thiếu tại bước tiếp theo."}
+              </small>
+            </div>
             <section className="record-timeline">
               <h3>
                 <MessageSquare size={16} /> Nhật ký liên hệ
@@ -996,7 +1106,22 @@ export default function Customers({
                           }))
                         }
                       >
-                        {type === "select" ? (
+                        {key === "bill" ? (
+                          <MoneyInput
+                            className="input"
+                            aria-label={label}
+                            compact
+                            value={draft.survey?.[key] ?? ""}
+                            min={0}
+                            max={500000000}
+                            onChange={(value) =>
+                              setDraft((d) => ({
+                                ...d,
+                                survey: { ...d.survey, [key]: value },
+                              }))
+                            }
+                          />
+                        ) : type === "select" ? (
                           <select
                             className="select"
                             value={draft.survey?.[key] || ""}

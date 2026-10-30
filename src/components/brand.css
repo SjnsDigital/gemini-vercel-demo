@@ -1,0 +1,85 @@
+/* Original Kim Solar mark, with near-white background transparency. */
+.brand-official.brand-official {
+  position: relative;
+  isolation: isolate;
+  background: transparent;
+  overflow: hidden;
+}
+.brand-official.brand-official img {
+  position: relative;
+  z-index: 1;
+  user-select: none;
+  -webkit-user-drag: none;
+  transition: filter 0.25s ease;
+}
+.brand-official.brand-official::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    112deg,
+    transparent 20%,
+    #ffffff00 36%,
+    #ffffffd9 48%,
+    #ffffff00 60%,
+    transparent 76%
+  );
+  -webkit-mask-image: var(--brand-mask);
+  mask-image: var(--brand-mask);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  opacity: 0;
+  transform: translateX(-110%);
+}
+.official-sidebar-logo:hover .brand-official::after,
+.official-sidebar-logo:focus-visible .brand-official::after,
+.mobile-top-brand:hover .brand-official::after,
+.mobile-top-brand:focus-visible .brand-official::after,
+.official-guest-logo:hover .brand-official::after {
+  animation: brand-light-sweep 0.95s ease-out 1;
+}
+.official-sidebar-logo:hover .brand-official img,
+.mobile-top-brand:hover .brand-official img {
+  filter: drop-shadow(0 1px 4px #f59a2b22);
+}
+@keyframes brand-light-sweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-110%);
+  }
+  20%,
+  75% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(110%);
+  }
+}
+/* Exported quotations use the clean mark without decorative animation. */
+.ks-q-paper .brand-official::after,
+.ks-quote-paper .brand-official::after,
+.quote-brand.brand-official::after {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-official.brand-official img {
+    transition: none;
+  }
+  .brand-official.brand-official::after {
+    animation: none !important;
+    display: none;
+  }
+}
+@media print {
+  .brand-official.brand-official::after {
+    display: none !important;
+  }
+  .brand-official.brand-official img {
+    filter: none !important;
+  }
+}

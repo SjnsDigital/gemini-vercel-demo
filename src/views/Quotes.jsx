@@ -19,10 +19,17 @@ import {
   SquarePen,
   Eye,
   Save,
+  Upload,
+  Package,
+  ImageOff,
+  BadgeCheck,
+  ClipboardCheck,
 } from "lucide-react";
 import { downloadBlob } from "../lib/share.js";
 import "./quotes.css";
 import Brand from "../components/Brand.jsx";
+import MoneyInput from "../components/MoneyInput.jsx";
+import { searchText } from "../lib/workflow.js";
 
 const money = (n) => Math.round(Number(n) || 0).toLocaleString("vi-VN") + " đ";
 const number = (n) => (Number.isFinite(Number(n)) ? Number(n) : 0);
@@ -44,7 +51,7 @@ const statusText = {
   accepted: "Khách đồng ý",
   declined: "Không tiếp tục",
 };
-function createDraft(plan, settings, source) {
+export function createDraft(plan, settings, source, products = []) {
   if (source)
     return {
       ...clone(source),
@@ -70,6 +77,7 @@ function createDraft(plan, settings, source) {
     customer: { name: "", phone: "", address: "", taxCode: "" },
     rows: clone(plan?.result?.rows || []).map((r, i) => ({
       ...r,
+      brand: r.brand || products.find((p) => p.id === r.productId)?.brand || "",
       id: r.id || "r" + i,
       name: r.name || "Hạng mục",
       model: r.model || "",
@@ -164,6 +172,10 @@ async function capturePages(node) {
   const canvas = await toCanvas(node, {
     pixelRatio: 2,
     backgroundColor: "#ffffff",
+    width: node.offsetWidth,
+    height: node.scrollHeight,
+    // Centering margins belong to the preview, not the exported A4 canvas.
+    style: { margin: "0", transform: "none", boxShadow: "none" },
     skipFonts: false,
     preferredFontFormat: "woff2",
     cacheBust: false,
@@ -171,12 +183,12 @@ async function capturePages(node) {
   const pageHeight = Math.floor((canvas.width / 190) * 273),
     scale = canvas.width / node.offsetWidth;
   const origin = node.getBoundingClientRect().top,
-    breaks = [...node.querySelectorAll("tr,.ks-q-totals,.ks-q-terms")].map(
-      (e) => ({
-        top: Math.floor((e.getBoundingClientRect().top - origin) * scale),
-        bottom: Math.ceil((e.getBoundingClientRect().bottom - origin) * scale),
-      }),
-    );
+    breaks = [
+      ...node.querySelectorAll("tr,.ks-q-totals,.ks-q-terms,.ks-q-investment"),
+    ].map((e) => ({
+      top: Math.floor((e.getBoundingClientRect().top - origin) * scale),
+      bottom: Math.ceil((e.getBoundingClientRect().bottom - origin) * scale),
+    }));
   const pages = [];
   let start = 0;
   while (start < canvas.height) {
@@ -218,16 +230,49 @@ function Editor({
   onSave,
   onDuplicate,
   notify,
+  onRememberImage,
 }) {
   const dialog = useRef(),
     paper = useRef(),
+    activeEditor = useRef(true),
     [busy, setBusy] = useState(""),
-    [tab, setTab] = useState(readOnly ? "preview" : "edit");
+    [tab, setTab] = useState(readOnly ? "preview" : "edit"),
+    [inputErrors, setInputErrors] = useState({}),
+    [imageBusy, setImageBusy] = useState(null);
+  const validity = (key, valid) =>
+    setInputErrors((current) => ({ ...current, [key]: !valid }));
+  const hasInvalidMoney = Object.values(inputErrors).some(Boolean);
   const totals = amounts(draft),
     issues = blocks(draft),
     company = settings.companyName || "CÔNG TY TNHH NĂNG LƯỢNG KIM SOLAR";
+  const sameSystem = draft.plan?.result?.rows
+    ?.filter((row) => ["panel", "inv", "bat"].includes(row.id))
+    .every((source) =>
+      draft.rows.some(
+        (row) =>
+          row.id === source.id &&
+          number(row.qty) === number(source.qty) &&
+          String(row.model || "") === String(source.model || ""),
+      ),
+    );
+  const quoteRoi =
+    sameSystem &&
+    draft.plan?.result?.valid &&
+    number(draft.plan.result.monthlySavings) > 0 &&
+    totals.total > 0 &&
+    draft.rows.every(
+      (row) =>
+        number(row.price) > 0 &&
+        ![8888888, 1111111111].includes(number(row.price)),
+    )
+      ? totals.total / (number(draft.plan.result.monthlySavings) * 12)
+      : null;
   useEffect(() => {
+    activeEditor.current = true;
     dialog.current?.showModal();
+    return () => {
+      activeEditor.current = false;
+    };
   }, []);
   const change = (key, value) => setDraft((d) => ({ ...d, [key]: value }));
   const rowChange = (i, key, value) =>
@@ -267,6 +312,9 @@ function Editor({
             ] || p.category) +
             " " +
             p.brand,
+          productId: p.id,
+          brand: p.brand || "",
+          description: p.description || "",
           model: p.model || p.description || "",
           unit: p.category === "panel" ? "tấm" : "bộ",
           qty: 1,
@@ -278,11 +326,88 @@ function Editor({
       ],
     }));
   }
+  async function replaceImage(event, index) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (!/^image\/(png|jpeg|webp)$/.test(file.type) || file.size > 8e6) {
+      notify("Chọn ảnh PNG, JPG hoặc WebP dưới 8 MB.");
+      return;
+    }
+    const rowId = draft.rows[index]?.id;
+    if (!rowId) return;
+    setImageBusy(index);
+    const url = URL.createObjectURL(file);
+    try {
+      const photo = new window.Image();
+      photo.src = url;
+      await photo.decode();
+      const ratio = Math.min(
+        1,
+        800 / Math.max(photo.naturalWidth, photo.naturalHeight),
+      );
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(photo.naturalWidth * ratio));
+      canvas.height = Math.max(1, Math.round(photo.naturalHeight * ratio));
+      canvas
+        .getContext("2d")
+        .drawImage(photo, 0, 0, canvas.width, canvas.height);
+      const image = canvas.toDataURL("image/webp", 0.85);
+      if (!activeEditor.current) return;
+      setDraft((current) =>
+        current
+          ? {
+              ...current,
+              rows: current.rows.map((row) =>
+                row.id === rowId ? { ...row, image } : row,
+              ),
+            }
+          : current,
+      );
+      notify(
+        "Đã thay ảnh trong báo giá. Lưu bản nháp để giữ ảnh trên trình duyệt này.",
+      );
+    } catch {
+      if (activeEditor.current)
+        notify("Không đọc được ảnh. Hãy thử ảnh PNG, JPG hoặc WebP khác.");
+    } finally {
+      URL.revokeObjectURL(url);
+      if (activeEditor.current) setImageBusy(null);
+    }
+  }
+  function saveChecked(status) {
+    if (imageBusy !== null) {
+      notify("Ảnh đang được xử lý. Vui lòng đợi ảnh hiển thị trước khi lưu.");
+      return;
+    }
+    const invalid = dialog.current?.querySelector("input:invalid");
+    if (invalid || hasInvalidMoney) {
+      setTab("edit");
+      invalid?.reportValidity();
+      notify("Kiểm tra ô tiền đang nhập trước khi lưu báo giá.");
+      return;
+    }
+    onSave(draft, status);
+  }
   async function exportDoc(type) {
+    if (imageBusy !== null) {
+      notify("Ảnh đang được xử lý. Vui lòng đợi ảnh hiển thị trước khi xuất.");
+      return;
+    }
+    if (hasInvalidMoney || dialog.current?.querySelector("input:invalid")) {
+      setTab("edit");
+      notify("Kiểm tra ô tiền đang nhập trước khi xuất báo giá.");
+      return;
+    }
     setBusy(type);
     try {
       setTab("preview");
       await new Promise((r) => setTimeout(r, 120));
+      await Promise.all(
+        [...paper.current.querySelectorAll("img")].map((image) =>
+          image.decode().catch(() => {}),
+        ),
+      );
       const pages = await capturePages(paper.current);
       if (type === "pdf") {
         const { jsPDF } = await import("jspdf");
@@ -398,7 +523,7 @@ function Editor({
         <div className="ks-q-export">
           <button
             className="btn btn-secondary"
-            disabled={!!busy}
+            disabled={!!busy || imageBusy !== null}
             onClick={() => exportDoc("image")}
           >
             <Image size={15} />
@@ -406,7 +531,7 @@ function Editor({
           </button>
           <button
             className="btn btn-secondary"
-            disabled={!!busy}
+            disabled={!!busy || imageBusy !== null}
             onClick={() => exportDoc("pdf")}
           >
             {busy ? (
@@ -487,6 +612,11 @@ function Editor({
                 <h3>Danh mục hàng hóa & dịch vụ</h3>
                 <span className="ks-muted">{draft.rows.length} hạng mục</span>
               </div>
+              <p className="ks-q-edit-hint">
+                <BadgeCheck size={16} />
+                Nhập giá nhanh: <b>2.2 = 2,2 triệu</b>, <b>500k = 500 nghìn</b>.
+                Thay ảnh ngay tại từng thiết bị.
+              </p>
               <div className="table-wrap">
                 <table className="data-table ks-editor-table">
                   <thead>
@@ -520,15 +650,111 @@ function Editor({
                             disabled={readOnly}
                             rows={2}
                           />
-                          <input
-                            className="ks-unit-input"
-                            aria-label={`Đơn vị hạng mục ${i + 1}`}
-                            value={r.unit}
-                            onChange={(e) =>
-                              rowChange(i, "unit", e.target.value)
-                            }
-                            disabled={readOnly}
-                          />
+                          <div className="ks-row-meta-fields">
+                            <input
+                              className="ks-unit-input"
+                              aria-label={`Đơn vị hạng mục ${i + 1}`}
+                              value={r.unit}
+                              onChange={(e) =>
+                                rowChange(i, "unit", e.target.value)
+                              }
+                              disabled={readOnly}
+                            />
+                            <input
+                              aria-label={`Hãng hạng mục ${i + 1}`}
+                              placeholder="Hãng sản xuất"
+                              value={r.brand || ""}
+                              onChange={(e) =>
+                                rowChange(i, "brand", e.target.value)
+                              }
+                              disabled={readOnly}
+                            />
+                          </div>
+                          <details className="ks-row-extra">
+                            <summary>Ảnh, bảo hành & thông số</summary>
+                            <div className="ks-row-image-editor">
+                              <div className="ks-row-image-preview">
+                                {r.image ? (
+                                  <img
+                                    src={r.image}
+                                    alt={`Ảnh hạng mục ${i + 1}`}
+                                    onError={(e) => {
+                                      e.currentTarget.hidden = true;
+                                    }}
+                                    onLoad={(e) => {
+                                      e.currentTarget.hidden = false;
+                                    }}
+                                  />
+                                ) : (
+                                  <Package size={26} />
+                                )}
+                              </div>
+                              {!readOnly && (
+                                <div className="ks-row-image-actions">
+                                  <label className="ks-image-upload">
+                                    <Upload size={14} />
+                                    {imageBusy === i
+                                      ? "Đang xử lý…"
+                                      : r.image
+                                        ? "Thay ảnh"
+                                        : "Thêm ảnh"}
+                                    <input
+                                      type="file"
+                                      accept="image/png,image/jpeg,image/webp"
+                                      aria-label={`Thay ảnh hạng mục ${i + 1}`}
+                                      disabled={imageBusy !== null}
+                                      onChange={(e) => replaceImage(e, i)}
+                                    />
+                                  </label>
+                                  {r.image && (
+                                    <button
+                                      type="button"
+                                      className="ks-text-button"
+                                      disabled={imageBusy !== null}
+                                      onClick={() => rowChange(i, "image", "")}
+                                    >
+                                      <ImageOff size={14} />
+                                      Bỏ ảnh
+                                    </button>
+                                  )}
+                                  {r.image &&
+                                    r.productId &&
+                                    onRememberImage && (
+                                      <button
+                                        type="button"
+                                        className="ks-text-button"
+                                        disabled={imageBusy !== null}
+                                        onClick={() =>
+                                          onRememberImage(r.productId, r.image)
+                                        }
+                                      >
+                                        <Save size={14} />
+                                        Nhớ vào danh mục
+                                      </button>
+                                    )}
+                                </div>
+                              )}
+                            </div>
+                            <textarea
+                              aria-label={`Thông số hạng mục ${i + 1}`}
+                              placeholder="Thông số / mô tả bổ sung"
+                              rows={2}
+                              value={r.description || ""}
+                              onChange={(e) =>
+                                rowChange(i, "description", e.target.value)
+                              }
+                              disabled={readOnly}
+                            />
+                            <input
+                              aria-label={`Bảo hành hạng mục ${i + 1}`}
+                              placeholder="Thông tin bảo hành"
+                              value={r.warranty || ""}
+                              onChange={(e) =>
+                                rowChange(i, "warranty", e.target.value)
+                              }
+                              disabled={readOnly}
+                            />
+                          </details>
                         </td>
                         <td data-label="Số lượng">
                           <input
@@ -551,20 +777,14 @@ function Editor({
                           />
                         </td>
                         <td data-label="Đơn giá (đ)">
-                          <input
-                            type="number"
-                            min="0"
-                            max="1000000000000"
+                          <MoneyInput
+                            min={0}
+                            max={1e12}
                             aria-label={`Đơn giá hạng mục ${i + 1}`}
                             value={r.price}
-                            onChange={(e) =>
-                              rowChange(
-                                i,
-                                "price",
-                                e.target.value === ""
-                                  ? ""
-                                  : Number(e.target.value),
-                              )
+                            onChange={(value) => rowChange(i, "price", value)}
+                            onValidityChange={(valid) =>
+                              validity("row-" + r.id, valid)
                             }
                             disabled={readOnly}
                           />
@@ -591,12 +811,17 @@ function Editor({
                           <td>
                             <button
                               className="ks-icon-btn"
-                              onClick={() =>
+                              disabled={imageBusy !== null}
+                              onClick={() => {
+                                setInputErrors((current) => ({
+                                  ...current,
+                                  ["row-" + r.id]: false,
+                                }));
                                 setDraft((d) => ({
                                   ...d,
                                   rows: d.rows.filter((_, j) => i !== j),
-                                }))
-                              }
+                                }));
+                              }}
                               aria-label={`Xóa hạng mục ${i + 1}`}
                             >
                               <Trash2 size={15} />
@@ -711,15 +936,14 @@ function Editor({
               )}
               <label className="field">
                 <span>Giảm giá (đ)</span>
-                <input
+                <MoneyInput
                   className="input"
-                  type="number"
-                  min="0"
+                  aria-label="Giảm giá (đ)"
+                  min={0}
                   max={totals.subtotal}
                   value={draft.discount}
-                  onChange={(e) =>
-                    change("discount", Math.max(0, +e.target.value || 0))
-                  }
+                  onChange={(value) => change("discount", value)}
+                  onValidityChange={(valid) => validity("discount", valid)}
                   disabled={readOnly}
                 />
               </label>
@@ -758,6 +982,47 @@ function Editor({
                 <strong>{money(totals.total)}</strong>
               </div>
             </section>
+            <div className="ks-q-checklist">
+              <h3>
+                <ClipboardCheck size={17} />
+                Trước khi gửi khách
+              </h3>
+              {[
+                [
+                  Boolean(
+                    draft.customer?.name?.trim() &&
+                      draft.customer?.phone?.trim(),
+                  ),
+                  "Thông tin người nhận",
+                ],
+                [
+                  draft.rows.length > 0 &&
+                    draft.rows.every((r) => r.verified && Number(r.price) > 0),
+                  "Đơn giá đã kiểm tra",
+                ],
+                [
+                  !draft.plan || draft.plan.input?.surveyConfirmed === true,
+                  "Khảo sát phương án",
+                ],
+                [
+                  Boolean(
+                    draft.validUntil &&
+                      Date.parse(draft.validUntil + "T23:59:59+07:00") >=
+                        Date.now(),
+                  ),
+                  "Hiệu lực báo giá",
+                ],
+              ].map(([ready, label]) => (
+                <div key={label} className={ready ? "ready" : ""}>
+                  <Check size={14} />
+                  {label}
+                </div>
+              ))}
+              <small>
+                Ảnh và bảo hành thuộc bản chụp báo giá. Bản đã lưu không thay
+                đổi theo danh mục.
+              </small>
+            </div>
             {issues.length > 0 && (
               <div className="ks-q-issues">
                 <b>
@@ -787,10 +1052,7 @@ function Editor({
             }
           >
             <header className="ks-q-company">
-              <div>
-                <div className="ks-q-logo">
-                  <Brand className="quote-brand" />
-                </div>
+              <div className="ks-q-company-details">
                 <strong>{company}</strong>
                 <p>
                   {settings.address ||
@@ -800,22 +1062,25 @@ function Editor({
                   MST: {settings.taxCode || "3703397629"} ·{" "}
                   {settings.email || "cskh.kimsolar@gmail.com"}
                 </p>
-                <p>
-                  <b>
-                    {settings.salesPhone || "0987000783"} —{" "}
-                    {settings.salesName || "Nhân Viên Kinh Doanh"}
-                  </b>
+                <p className="ks-q-company-contact">
+                  <b>{settings.salesPhone || "0987000783"}</b> ·{" "}
+                  {settings.salesName || "Nhân Viên Kinh Doanh"}
                 </p>
               </div>
-              <span className={"ks-q-state " + (quoteIssued ? "issued" : "")}>
-                {statusText[draft.status] || "BẢN NHÁP"}
-              </span>
+              <div className="ks-q-brandstamp">
+                <div className="ks-q-logo">
+                  <Brand className="quote-brand" />
+                </div>
+                <span className={"ks-q-state " + (quoteIssued ? "issued" : "")}>
+                  {statusText[draft.status] || "BẢN NHÁP"}
+                </span>
+              </div>
             </header>
             <div className="ks-q-title">
               <span>GIẢI PHÁP ĐIỆN MẶT TRỜI ÁP MÁI</span>
-              <h1>BẢNG BÁO GIÁ</h1>
+              <h1>BẢNG BÁO GIÁ THIẾT BỊ & VẬT TƯ</h1>
               <p>
-                {draft.number} · Phiên bản {draft.revision || 1} · Ngày{" "}
+                {draft.number} <i /> Phiên bản {draft.revision || 1} <i /> Ngày{" "}
                 {date(draft.createdAt || new Date().toISOString())}
               </p>
             </div>
@@ -871,11 +1136,38 @@ function Editor({
                 </div>
               </div>
             )}
+            <div className="ks-q-scope-line">
+              <span>
+                <b>Phạm vi đề xuất</b>
+                {draft.plan
+                  ? draft.plan.input?.mode === "grid_tied"
+                    ? "Hệ điện mặt trời hòa lưới tự dùng"
+                    : "Hệ điện mặt trời hybrid có lưu trữ"
+                  : "Thiết bị và dịch vụ theo danh mục bên dưới"}
+              </span>
+              <span>
+                <b>Danh mục</b>
+                {draft.rows.length} hạng mục · hiệu lực đến{" "}
+                {date(draft.validUntil)}
+              </span>
+            </div>
             <table className="ks-q-print-table">
+              <colgroup>
+                <col style={{ width: "4%" }} />
+                <col style={{ width: "28%" }} />
+                <col style={{ width: "10%" }} />
+                <col style={{ width: "11%" }} />
+                <col style={{ width: "6%" }} />
+                <col style={{ width: "6%" }} />
+                <col style={{ width: "16%" }} />
+                <col style={{ width: "19%" }} />
+              </colgroup>
               <thead>
                 <tr>
                   <th>#</th>
                   <th>THIẾT BỊ / HẠNG MỤC</th>
+                  <th>HÌNH ẢNH</th>
+                  <th>HÃNG</th>
                   <th>ĐVT</th>
                   <th>SL</th>
                   <th>ĐƠN GIÁ</th>
@@ -889,9 +1181,33 @@ function Editor({
                     <td>
                       <strong>{r.name}</strong>
                       {r.model && <p>{r.model}</p>}
-                      {r.warranty && <small>{r.warranty}</small>}
+                      {r.description && r.description !== r.model && (
+                        <p className="ks-q-row-description">{r.description}</p>
+                      )}
+                      {r.warranty && (
+                        <small className="ks-q-row-warranty">
+                          {r.warranty}
+                        </small>
+                      )}
                       {!r.verified && <em>Giá chờ xác minh</em>}
                     </td>
+                    <td className="ks-q-print-image">
+                      {r.image ? (
+                        <img
+                          src={r.image}
+                          alt={r.name}
+                          onError={(e) => {
+                            e.currentTarget.hidden = true;
+                          }}
+                          onLoad={(e) => {
+                            e.currentTarget.hidden = false;
+                          }}
+                        />
+                      ) : (
+                        <span className="ks-q-image-empty">—</span>
+                      )}
+                    </td>
+                    <td className="ks-q-print-brand">{r.brand || "—"}</td>
                     <td>{r.unit}</td>
                     <td>{number(r.qty).toLocaleString("vi-VN")}</td>
                     <td>{money(r.price)}</td>
@@ -934,6 +1250,51 @@ function Editor({
                 <strong>{money(totals.total)}</strong>
               </div>
             </section>
+            {draft.plan?.result?.valid && (
+              <section className="ks-q-investment">
+                <header>
+                  <b>HIỆU QUẢ THAM KHẢO</b>
+                  <span>Theo dữ liệu phương án tại thời điểm lập</span>
+                </header>
+                <div>
+                  {[
+                    [
+                      "Sản lượng dự kiến",
+                      draft.plan.result.monthlyGeneration,
+                      "kWh/tháng",
+                    ],
+                    [
+                      "Tiết kiệm dự kiến",
+                      draft.plan.result.monthlySavings,
+                      "đ/tháng",
+                    ],
+                    ["Hoàn vốn theo giá đề xuất", quoteRoi, "năm"],
+                  ].map(([label, value, unit]) => (
+                    <div key={label}>
+                      <small>{label}</small>
+                      <b>
+                        {value == null || !Number.isFinite(Number(value))
+                          ? "Cần tính lại"
+                          : unit === "đ/tháng"
+                            ? money(value)
+                            : Number(value).toLocaleString("vi-VN", {
+                                maximumFractionDigits: 1,
+                              })}
+                        {value != null && (
+                          <em>{unit === "đ/tháng" ? "/tháng" : unit}</em>
+                        )}
+                      </b>
+                    </div>
+                  ))}
+                </div>
+                <p>
+                  Ước tính theo nắng, biểu giá và mức tự dùng của phương án;
+                  không phải cam kết sản lượng. Giá hoặc số lượng thay đổi cần
+                  tính lại thiết kế; hoàn vốn đơn giản dùng tổng giá đề xuất
+                  hiện tại chia cho tiết kiệm một năm của phương án.
+                </p>
+              </section>
+            )}
             <section className="ks-q-terms">
               <h3>Phạm vi & điều kiện</h3>
               <p>{draft.terms}</p>
@@ -957,6 +1318,8 @@ function Editor({
                   ĐẠI DIỆN KIM SOLAR
                   <br />
                   <small>{settings.salesName || "Nhân Viên Kinh Doanh"}</small>
+                  <br />
+                  <small>{settings.salesPhone || "0987000783"}</small>
                 </span>
               </div>
             </section>
@@ -987,20 +1350,23 @@ function Editor({
             <>
               <button
                 className="btn btn-secondary"
-                onClick={() => onSave(draft, "draft")}
+                disabled={imageBusy !== null}
+                onClick={() => saveChecked("draft")}
               >
                 <Save size={16} />
                 Lưu bản nháp
               </button>
               <button
                 className="btn btn-primary"
-                disabled={!!issues.length}
+                disabled={
+                  !!issues.length || hasInvalidMoney || imageBusy !== null
+                }
                 title={
                   issues.length
                     ? "Hoàn thiện các mục kiểm tra trước khi phát hành"
                     : ""
                 }
-                onClick={() => onSave(draft, "issued")}
+                onClick={() => saveChecked("issued")}
               >
                 <Check size={16} />
                 Phát hành bản chốt
@@ -1019,6 +1385,8 @@ export default function Quotes({
   onNavigate,
   initialPlan,
   onConsumedPlan,
+  initialAction,
+  onConsumedAction,
 }) {
   const [search, setSearch] = useState(""),
     [filter, setFilter] = useState("all"),
@@ -1026,22 +1394,64 @@ export default function Quotes({
     [readOnly, setReadOnly] = useState(false);
   const settings = db.settings || {},
     quotes = db.quotes || [];
+  function linkCustomer(next) {
+    const customer = db.customers?.find(
+      (row) => row.id === next.plan?.customerId,
+    );
+    return customer
+      ? {
+          ...next,
+          customerId: customer.id,
+          customer: {
+            name: customer.name || "",
+            phone: customer.phone || "",
+            address: customer.address || "",
+            taxCode: customer.taxCode || "",
+          },
+        }
+      : next;
+  }
   useEffect(() => {
     if (initialPlan) {
-      setDraft(createDraft(initialPlan, settings));
+      setDraft(
+        linkCustomer(createDraft(initialPlan, settings, null, db.products)),
+      );
       setReadOnly(false);
       onConsumedPlan?.();
     }
   }, [initialPlan]);
+  useEffect(() => {
+    if (!initialAction) return;
+    if (initialAction.type === "filter") {
+      setSearch(String(initialAction.query || ""));
+      setFilter(
+        ["all", "draft", "issued"].includes(initialAction.filter)
+          ? initialAction.filter
+          : "all",
+      );
+    } else if (
+      ["new-quote", "quote-from-latest-plan", "quote-checklist"].includes(
+        initialAction.type,
+      )
+    ) {
+      const plan =
+        initialAction.type === "quote-from-latest-plan" ? db.plans?.[0] : null;
+      if (initialAction.type === "quote-from-latest-plan" && !plan)
+        notify("Lưu một phương án trước khi tạo báo giá từ cấu hình.");
+      else {
+        setDraft(linkCustomer(createDraft(plan, settings, null, db.products)));
+        setReadOnly(false);
+      }
+    }
+    onConsumedAction?.();
+  }, [initialAction?.id]);
   const visible = useMemo(
     () =>
       quotes.filter(
         (q) =>
           (filter === "all" || q.status === filter) &&
           [q.number, q.customer?.name, q.customer?.phone].some((x) =>
-            String(x || "")
-              .toLowerCase()
-              .includes(search.toLowerCase()),
+            searchText(x).includes(searchText(search)),
           ),
       ),
     [quotes, filter, search],
@@ -1105,7 +1515,7 @@ export default function Quotes({
         <button
           className="btn btn-primary"
           onClick={() => {
-            setDraft(createDraft(null, settings));
+            setDraft(createDraft(null, settings, null, db.products));
             setReadOnly(false);
           }}
         >
@@ -1261,7 +1671,7 @@ export default function Quotes({
               <button
                 className="btn btn-secondary"
                 onClick={() => {
-                  setDraft(createDraft(null, settings));
+                  setDraft(createDraft(null, settings, null, db.products));
                   setReadOnly(false);
                 }}
               >
@@ -1288,10 +1698,25 @@ export default function Quotes({
           onClose={() => setDraft(null)}
           onSave={save}
           onDuplicate={(source) => {
-            setDraft(createDraft(null, settings, source));
+            setDraft(createDraft(null, settings, source, db.products));
             setReadOnly(false);
           }}
           notify={notify}
+          onRememberImage={(productId, image) => {
+            if (!db.products.some((p) => p.id === productId)) {
+              notify("Thiết bị gốc không còn trong danh mục.");
+              return;
+            }
+            updateDb((prev) => ({
+              ...prev,
+              products: prev.products.map((p) =>
+                p.id === productId ? { ...p, image } : p,
+              ),
+            }));
+            notify(
+              "Đã nhớ ảnh cho thiết bị trong danh mục trên trình duyệt này. Báo giá đã lưu trước đó giữ ảnh riêng.",
+            );
+          }}
         />
       )}
     </section>

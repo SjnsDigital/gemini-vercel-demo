@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import "./settings.css";
+import MoneyInput from "../components/MoneyInput.jsx";
 
 const TABLES = [
   "customers",
@@ -761,17 +762,17 @@ export default function Settings({
                   ].map(([key, label]) => (
                     <div className="field" key={key}>
                       <label htmlFor={`rate-${key}`}>{label} (đ/kW)</label>
-                      <input
+                      <MoneyInput
                         id={`rate-${key}`}
                         className="input"
-                        type="number"
-                        min="0"
-                        max="100000000"
+                        min={0}
+                        max={100000000}
+                        required
                         value={form.installationRates?.[key] ?? 500000}
-                        onChange={(e) =>
+                        onChange={(value) =>
                           set("installationRates", {
                             ...form.installationRates,
-                            [key]: Math.max(0, Number(e.target.value)),
+                            [key]: value,
                           })
                         }
                       />

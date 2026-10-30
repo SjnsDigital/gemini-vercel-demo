@@ -1,5 +1,7 @@
-const officialLogoURL = new URL("../assets/brand-logo.png", import.meta.url)
-  .href;
+const officialLogoURL = new URL(
+  "../assets/brand-logo-transparent.svg",
+  import.meta.url,
+).href;
 const MAX_TOKEN = 180000;
 const MAX_BYTES = 250000;
 const INPUT_FIELDS = [

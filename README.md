@@ -1,4 +1,4 @@
-# Kim Solar Workspace 2.2
+# Kim Solar Workspace 2.3
 
 Bản công khai: **https://sjnsdigital.github.io/gemini-vercel-demo/** — GitHub Pages, không cần đăng nhập Vercel.
 
@@ -6,7 +6,7 @@ Bản công khai: **https://sjnsdigital.github.io/gemini-vercel-demo/** — GitH
 
 ## Chạy ứng dụng
 
-Yêu cầu Node.js 20.19+ hoặc 22.12+; môi trường phát triển đã dùng Node 24.
+Yêu cầu Node.js 22.12+; môi trường phát triển đã dùng Node 24.
 
 ```sh
 npm ci
@@ -79,3 +79,19 @@ Bản public không có hồ sơ khách thật được cài sẵn. Dữ liệu 
 - Cẩm nang có chủ đề lọc nhanh, tìm không dấu, nội dung thu gọn và sao chép gợi ý.
 
 Kiểm tra tương tác bổ sung: `tests/e2e/interactions.py`. Bộ test dữ liệu còn kiểm tra biên ngày Việt Nam, hàng đợi đến hạn và bảo toàn dữ liệu bản chụp khi so sánh. Xuất bản tĩnh tiếp tục dùng GitHub Pages với tên miền hiện tại và không yêu cầu đăng nhập.
+
+## Bản 2.3 — trợ lý nghiệp vụ, nhập gọn và báo giá
+
+Trợ lý của cả 10 mục hỗ trợ bộ kỹ năng riêng, chạy ngay trên trình duyệt, không cần API hoặc đăng nhập. Yêu cầu được phân tích thành thông tin xem trước; người dùng chọn nút thực hiện để mở tác vụ hoặc thêm việc. Đây là bộ xử lý nghiệp vụ đã lập trình, không phải mô hình hội thoại tự do được huấn luyện riêng.
+
+Có thể dùng những câu như “Tính hóa đơn 2.2tr mái 12x8 3 pha hòa lưới”, “Nhắc gọi khách ngày mai”, dán tên/số điện thoại/tiền điện để điền hồ sơ; tra model và giá, rà soát bản nháp, mở hàng đợi quá hạn, so sánh bản lưu, giải thích chủ đề tư vấn và tải bản sao lưu. Thông tin thiếu được ghi rõ, không tự xác minh giá, xác nhận khảo sát hoặc phát hành/gửi báo giá.
+
+Các ô tiền dùng chung quy tắc nhập gọn: 2 và 2.2 tương ứng 2.000.000 đ và 2.200.000 đ; 2tr2, 500k, 1ty5 hoặc số đồng đầy đủ cũng dùng được. Số không đơn vị nhỏ hơn 1000 được hiểu theo đơn vị ghi ở ô; số từ1000 trở lên giữ là đồng. Thêm “đ” để nhập số đồng nhỏ rõ ràng. Riêng đơn giá điện đ/kWh dùng nghìn đồng: 2.2 → 2.200 đ. Mọi ô đều hiển thị số đồng được hiểu; giá sai/trống không được dùng để lưu, tạo hoặc xuất tài liệu hợp lệ.
+
+Tra nhanh có ô tiền tùy chọn tính ngay; hồ sơ khách chuyển trực tiếp sang phương án với tiền điện, mái, tỷ lệ ngày và pha đã ghi, đồng thời giữ liên kết khách khi tạo báo giá. Lệnh cẩm nang/so sánh và tìm hồ sơ áp dụng được lặp lại sau khi chỉnh tay.
+
+Báo giá A4 có ảnh thiết bị, hãng/model, thông số/bảo hành, khối tổng tiền, hiệu quả tham khảo, điều khoản và chữ ký. Ảnh được thêm/thay/bỏ ngay ở từng dòng; lưu nháp giữ ảnh trong bản chụp, nút “Nhớ vào danh mục” chủ động dùng ảnh cho báo giá về sau. Bản cũ không bị thay đổi khi tạo phiên bản tiếp theo. Dữ liệu/ảnh lưu trên trình duyệt hiện tại và đi cùng file sao lưu JSON, không tự thay tài nguyên công khai của mọi người truy cập.
+
+Logo nguồn được giữ nguyên hình/chữ/màu, render nền trong suốt bằng SVG, có hiệu ứng sáng nhẹ khi tương tác; hiệu ứng tắt khi giảm chuyển động hoặc xuất tài liệu. PDF/PNG được dựng với lề/chiều rộng cố định và tách trang tránh cắt dòng; đã kiểm tra trực tiếp các trang xuất.
+
+Kiểm tra mới: `tests/e2e/smart_workspace.py` và `assistant_handoffs.py`, ngoài các bài kiểm tra hiện có. Giữ khóa lưu trữ `kimsolar.workspace.v2` và định dạng backup v1 để dùng tiếp dữ liệu cũ.

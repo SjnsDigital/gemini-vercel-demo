@@ -41,7 +41,9 @@ import PageAgent from "./components/PageAgent.jsx";
 import TaskBoard from "./components/TaskBoard.jsx";
 import PlanComparison from "./components/PlanComparison.jsx";
 import QuickActions from "./components/QuickActions.jsx";
-import { searchText } from "./lib/workflow.js";
+import { searchText, localDay } from "./lib/workflow.js";
+import MoneyInput from "./components/MoneyInput.jsx";
+import "./smart-workspace.css";
 import heroPhoto from "./assets/solar-residence.webp";
 import heroPhotoMobile from "./assets/solar-residence-mobile.webp";
 import { normalizeAssetPaths } from "./lib/assets.js";
@@ -171,6 +173,11 @@ export default function App() {
     [saveError, setSaveError] = useState(""),
     [editPlan, setEditPlan] = useState(null),
     [incomingQuote, setIncomingQuote] = useState(null),
+    [assistantIntent, setAssistantIntent] = useState(null),
+    [quoteAction, setQuoteAction] = useState(null),
+    [compareRequested, setCompareRequested] = useState(false),
+    [knowledgeQuery, setKnowledgeQuery] = useState(""),
+    [knowledgeRequest, setKnowledgeRequest] = useState(0),
     [shared, setShared] = useState(null),
     [shareError, setShareError] = useState(""),
     [planDraft, setPlanDraft] = useState(null),
@@ -302,12 +309,174 @@ export default function App() {
     if (key === "settings") setSettingsTab(payload?.tab || "company");
     if (key === "customers") setCustomerFocus(payload?.customerId || null);
     if (key === "catalog") setCatalogQuery(payload?.query || "");
+    if (key === "knowledge") {
+      setKnowledgeQuery(payload?.query || "");
+      setKnowledgeRequest((n) => n + 1);
+    }
+    if (key === "plans") setCompareRequested(payload?.compare ? uid() : false);
+    if (key === "catalog" && payload?.query && !payload.assistantAction)
+      setAssistantIntent({
+        id: uid(),
+        route: "catalog",
+        type: "filter",
+        filter: "all",
+        query: payload.query,
+      });
+    if (key === "customers" && payload?.customerId && !payload.assistantAction)
+      setAssistantIntent({
+        id: uid(),
+        route: "customers",
+        type: "open-customer",
+        customerId: payload.customerId,
+      });
+    if (
+      ["customers", "care", "catalog"].includes(key) &&
+      payload?.assistantAction
+    )
+      setAssistantIntent({ ...payload.assistantAction, id: uid(), route: key });
     setMobileSearch(false);
     location.hash = key;
     setRoute(key);
     setMobileMenu(false);
     setQuery("");
     window.scrollTo({ top: 0, behavior: "instant" });
+    if (key === "overview" && payload?.taskFocus)
+      setTimeout(
+        () =>
+          document.getElementById("today-tasks")?.scrollIntoView({
+            behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+              .matches
+              ? "auto"
+              : "smooth",
+            block: "start",
+          }),
+        250,
+      );
+  };
+  const handleAssistantAction = (action) => {
+    if (!action || typeof action !== "object") return false;
+    const intent = (target, value) => {
+      navigate(target);
+      setAssistantIntent({ ...value, route: target, id: uid() });
+    };
+    switch (action.type) {
+      case "calculate": {
+        const input = { ...defaults, ...action.input, surveyConfirmed: false };
+        navigate("calculator", {
+          input,
+          name: action.name || "Phương án từ trợ lý",
+        });
+        notify(
+          "Đã điền thông số. Kiểm tra mái và thiết bị trước khi lưu hoặc báo giá.",
+        );
+        break;
+      }
+      case "create-customer":
+      case "new-customer":
+        intent("customers", { ...action, type: "new-customer" });
+        break;
+      case "new-ticket":
+        intent("care", action);
+        break;
+      case "new-product":
+        intent("catalog", action);
+        break;
+      case "create-task": {
+        if (session?.role === "viewer") {
+          notify("Tài khoản đám mây chỉ có quyền xem.");
+          return false;
+        }
+        const title = String(action.task?.title || "")
+          .trim()
+          .slice(0, 200);
+        const due = action.task?.date || localDay();
+        if (
+          !title ||
+          !/^\d{4}-\d{2}-\d{2}$/.test(due) ||
+          Number.isNaN(Date.parse(due + "T12:00:00+07:00")) ||
+          localDay(new Date(due + "T12:00:00+07:00")) !== due
+        ) {
+          notify("Cần nội dung và ngày hẹn hợp lệ.");
+          return false;
+        }
+        if (
+          db.tasks.some((t) => !t.done && t.title === title && t.date === due)
+        ) {
+          notify("Việc này đã có trong lịch, không tạo trùng.");
+          return false;
+        }
+        updateDb((d) => ({
+          ...d,
+          tasks: [{ id: uid(), title, date: due, done: false }, ...d.tasks],
+        }));
+        navigate("overview");
+        notify("Đã thêm lịch việc từ nội dung bạn xác nhận.");
+        break;
+      }
+      case "backup": {
+        const body = JSON.stringify(
+          {
+            app: "kimsolar-workspace",
+            version: 1,
+            exportedAt: new Date().toISOString(),
+            db,
+          },
+          null,
+          2,
+        );
+        const url = URL.createObjectURL(
+          new Blob([body], { type: "application/json" }),
+        );
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `kimsolar-backup-${localDay()}.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        notify("Đã tải bản sao lưu đầy đủ dữ liệu hiện tại.");
+        break;
+      }
+      case "quote-from-plan": {
+        const plan = db.plans.find((p) => p.id === action.planId);
+        if (!plan) {
+          notify("Chưa tìm thấy phương án đã lưu. Hãy tính và lưu trước.");
+          return false;
+        }
+        navigate("quotes", plan);
+        break;
+      }
+      case "new-quote":
+        navigate("quotes");
+        setQuoteAction({ ...action, id: uid(), type: "new-quote" });
+        break;
+      case "filter":
+        if (["customers", "catalog", "care"].includes(action.route))
+          intent(action.route, action);
+        else if (action.route === "quotes") {
+          navigate("quotes");
+          setQuoteAction({ ...action, id: uid() });
+        } else if (action.route === "plans")
+          navigate("plans", { compare: Boolean(action.compare) });
+        else if (action.route === "knowledge")
+          navigate("knowledge", { query: action.query || "" });
+        else return false;
+        break;
+      case "knowledge":
+        navigate("knowledge", { query: action.query || "" });
+        break;
+      case "navigate":
+        if (navigation.some(([key]) => key === action.route))
+          navigate(action.route, action.payload);
+        else return false;
+        break;
+      default:
+        notify(
+          "Tác vụ này chưa được hỗ trợ. Chọn gợi ý trong đúng mục để tiếp tục.",
+        );
+        return false;
+    }
+    return true;
   };
   const savePlan = (p) => {
     setPlanDraft(p);
@@ -661,7 +830,12 @@ export default function App() {
               </div>
             }
           >
-            <PageAgent key={route} route={route} />
+            <PageAgent
+              key={route}
+              route={route}
+              db={db}
+              onAction={handleAssistantAction}
+            />
             {route === "overview" && (
               <Dashboard
                 db={db}
@@ -684,6 +858,7 @@ export default function App() {
             {route === "lookup" && <QuickLookup db={db} navigate={navigate} />}
             {route === "plans" && (
               <Plans
+                initialCompare={compareRequested}
                 db={db}
                 updateDb={updateDb}
                 navigate={navigate}
@@ -699,11 +874,19 @@ export default function App() {
                 onNavigate={navigate}
                 initialPlan={incomingQuote}
                 onConsumedPlan={() => setIncomingQuote(null)}
+                initialAction={quoteAction}
+                onConsumedAction={() => setQuoteAction(null)}
               />
             )}
             {route === "customers" && (
               <Customers
                 initialCustomerId={customerFocus}
+                assistantAction={
+                  assistantIntent?.route === "customers"
+                    ? assistantIntent
+                    : null
+                }
+                onConsumedAssistantAction={() => setAssistantIntent(null)}
                 db={db}
                 updateDb={updateDb}
                 notify={notify}
@@ -712,6 +895,10 @@ export default function App() {
             )}
             {route === "care" && (
               <Care
+                assistantAction={
+                  assistantIntent?.route === "care" ? assistantIntent : null
+                }
+                onConsumedAssistantAction={() => setAssistantIntent(null)}
                 db={db}
                 updateDb={updateDb}
                 notify={notify}
@@ -721,13 +908,22 @@ export default function App() {
             {route === "catalog" && (
               <Catalog
                 initialQuery={catalogQuery}
+                assistantAction={
+                  assistantIntent?.route === "catalog" ? assistantIntent : null
+                }
+                onConsumedAssistantAction={() => setAssistantIntent(null)}
                 db={db}
                 updateDb={updateDb}
                 notify={notify}
                 onNavigate={navigate}
               />
             )}
-            {route === "knowledge" && <Knowledge />}
+            {route === "knowledge" && (
+              <Knowledge
+                initialQuery={knowledgeQuery}
+                requestId={knowledgeRequest}
+              />
+            )}
             {route === "settings" && (
               <>
                 <Settings
@@ -1226,7 +1422,17 @@ function EnergyChart({ result }) {
   );
 }
 function QuickLookup({ db, navigate }) {
-  const [mode, setMode] = useState("hybrid");
+  const [mode, setMode] = useState("hybrid"),
+    [bill, setBill] = useState(2200000),
+    [moneyValid, setMoneyValid] = useState(true);
+  const input = {
+    ...defaults,
+    monthlyBill: bill,
+    mode,
+    roofLength: 20,
+    roofWidth: 15,
+  };
+  const quick = calculate(input, db.products, db.settings);
   return (
     <div className="enter">
       <div className="page-heading">
@@ -1253,6 +1459,55 @@ function QuickLookup({ db, navigate }) {
           </button>
         </div>
       </div>
+      <section
+        className="card lookup-smart-entry"
+        aria-label="Tra nhanh hóa đơn tùy chọn"
+      >
+        <div>
+          <span className="eyebrow">GÕ NGẮN, XEM NGAY</span>
+          <h2>Tiền điện tháng này bao nhiêu?</h2>
+          <label htmlFor="lookup-smart-bill">Hóa đơn điện</label>
+          <MoneyInput
+            id="lookup-smart-bill"
+            aria-label="Hóa đơn tra nhanh"
+            value={bill}
+            min={10000}
+            max={1000000000}
+            required
+            onChange={setBill}
+            onValidityChange={setMoneyValid}
+          />
+        </div>
+        {moneyValid && quick.valid ? (
+          <div className="lookup-smart-result" aria-live="polite">
+            <div>
+              <small>Công suất sơ bộ</small>
+              <strong>
+                {number(quick.systemKwp)} <em>kWp</em>
+              </strong>
+            </div>
+            <div>
+              <small>Tiết kiệm ước tính / tháng</small>
+              <strong>{currency(quick.monthlySavings)}</strong>
+            </div>
+            <button
+              className="btn btn-primary"
+              onClick={() =>
+                navigate("calculator", {
+                  input,
+                  result: quick,
+                  name: "Tra nhanh " + currency(bill),
+                })
+              }
+            >
+              Dùng mức này
+              <ArrowUpRight size={16} />
+            </button>
+          </div>
+        ) : (
+          <p className="muted">Nhập số tiền hợp lệ để xem kết quả.</p>
+        )}
+      </section>
       <div className="lookup-grid">
         {[
           1000000, 1500000, 2000000, 2500000, 3000000, 5000000, 7000000,
@@ -1312,7 +1567,14 @@ function QuickLookup({ db, navigate }) {
     </div>
   );
 }
-function Plans({ db, updateDb, navigate, onShare, notify }) {
+function Plans({
+  db,
+  updateDb,
+  navigate,
+  onShare,
+  notify,
+  initialCompare = false,
+}) {
   const [q, setQ] = useState("");
   const rows = db.plans.filter((p) =>
     searchText(p.name).includes(searchText(q)),
@@ -1347,6 +1609,7 @@ function Plans({ db, updateDb, navigate, onShare, notify }) {
         <span className="muted">{rows.length} phương án</span>
       </div>
       <PlanComparison
+        initialOpen={initialCompare}
         plans={db.plans}
         onOpen={(p) => navigate("calculator", p)}
         onQuote={(p) => navigate("quotes", p)}
@@ -1480,10 +1743,14 @@ const articles = [
     "Gửi cấu hình, đầu tư, tiết kiệm dự kiến, giả định và việc cần khảo sát. Chốt thời điểm liên hệ lại. Chia sẻ sử dụng tính năng hệ điều hành; không tự gửi tin khi chưa có tích hợp.",
   ],
 ];
-function Knowledge() {
-  const [q, setQ] = useState(""),
+function Knowledge({ initialQuery = "", requestId = 0 }) {
+  const [q, setQ] = useState(initialQuery),
     [topic, setTopic] = useState("Tất cả"),
     [copied, setCopied] = useState("");
+  useEffect(() => {
+    setQ(initialQuery);
+    setTopic("Tất cả");
+  }, [initialQuery, requestId]);
   const visible = articles.filter(
     (a) =>
       (topic === "Tất cả" || a[0] === topic) &&
